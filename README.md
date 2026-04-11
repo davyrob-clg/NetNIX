@@ -1,8 +1,61 @@
 ﻿# NetNIX
+<p align="center">
+  <img src="ReadMe_Resources/netnix-icon.png" alt="NetNIX Logo" width="180"/>
+</p>
 
-A multi-user UNIX-like operating environment built entirely in C# on .NET 8. NetNIX simulates a complete UNIX experience inside your terminal — with a virtual filesystem, user accounts, a shell, file permissions, a text editor, networking, and a C# scripting engine that lets you write and run scripts directly inside the environment.
+<h1 align="center">NetNIX</h1>
+
+<p align="center">
+  A multi-user UNIX-like operating environment built entirely in C# on .NET 8.
+</p>
+
+---
+
+NetNIX simulates a complete UNIX experience inside your terminal — with a virtual filesystem, user accounts, a shell, file permissions, a text editor, networking, and a C# scripting engine that lets you write and run scripts directly inside the environment.
 
 Everything lives in a single portable zip archive on your host OS. No admin rights, no VMs, no containers.
+
+## Screenshots
+
+<p align="center">
+  <img src="ReadMe_Resources/Login.png" alt="Login Screen" width="700"/><br/>
+  <em>Login prompt and boot sequence</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/Editor.png" alt="Text Editor" width="700"/><br/>
+  <em>Built-in full-screen text editor (nedit)</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/SH Shell Script Test 1.png" alt="Shell Script Test" width="700"/><br/>
+  <em>Writing and running shell scripts</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/SH Shell Script Test 2.png" alt="Shell Script Output" width="700"/><br/>
+  <em>Shell script output with variable expansion</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/Switch User.png" alt="Switch User" width="700"/><br/>
+  <em>Multi-user support — switching between accounts with <code>su</code></em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/Get Files From Web 1.png" alt="Networking" width="700"/><br/>
+  <em>Downloading files from the web with built-in networking commands</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/Zipping Archive.png" alt="Zip Archive" width="700"/><br/>
+  <em>Creating zip archives within the virtual filesystem</em>
+</p>
+
+<p align="center">
+  <img src="ReadMe_Resources/Unzipping Archive.png" alt="Unzip Archive" width="700"/><br/>
+  <em>Extracting zip archives within the virtual filesystem</em>
+</p>
 
 ## Features
 
@@ -123,7 +176,7 @@ All of these are plain C# source files compiled and executed at runtime:
 
 ### Build & Run
 ```bash
-git clone https://github.com/<your-username>/NetNIX.git
+git clone https://github.com/squiblez/NetNIX.git
 cd NetNIX
 dotnet run --project NetNIX
 ```
