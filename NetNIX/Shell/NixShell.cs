@@ -203,7 +203,7 @@ public sealed class NixShell
             whoami  id  uname  hostname  date  env
             basename  dirname  du  df  yes  true  false
             curl  wget  fetch  cbpaste  cbcopy  zip  unzip
-            mount  umount  export  importfile
+            mount  umount  export  importfile  npak  npak-demo
             useradd  userdel  usermod
             groupadd  groupdel  groupmod
 

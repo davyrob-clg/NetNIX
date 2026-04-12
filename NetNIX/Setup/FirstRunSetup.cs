@@ -166,6 +166,9 @@ public static class FirstRunSetup
             ("/var/spool/cron", 0, 0, "rwxr-xr-x"),
             ("/var/spool/mail", 0, 0, "rwxrwxrwt"),
             ("/var/tmp",        0, 0, "rwxrwxrwt"),
+
+            // Package manager
+            ("/var/lib/npak",   0, 0, "rwxr-xr-x"),
         ];
 
         foreach (var (path, uid, gid, perms) in dirs)
@@ -440,6 +443,7 @@ public static class FirstRunSetup
             ["groupmod"]    = HelpPages.Groupmod,
             ["export"]      = HelpPages.Export,
             ["importfile"]  = HelpPages.ImportFile,
+            ["npak"]        = HelpPages.Npak,
             ["mount"]       = HelpPages.Mount,
             ["umount"]      = HelpPages.Umount,
             ["source"]      = HelpPages.Source,

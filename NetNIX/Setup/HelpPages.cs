@@ -1732,6 +1732,85 @@ public static class HelpPages
             source, help, man api, man scripting
         """;
 
+    public const string Npak = """
+        NPAK(8)                   NetNIX Manual                   NPAK(8)
+
+        NAME
+            npak - NetNIX package manager
+
+        SYNOPSIS
+            npak install <package.npak>
+            npak remove <name>
+            npak list
+            npak info <name>
+
+        DESCRIPTION
+            npak installs, removes, and manages packages in NetNIX.
+            Packages are zip files with the .npak extension.
+
+            Only root (uid 0) can install or remove packages.
+
+        PACKAGE FORMAT
+            A .npak file is a standard zip archive containing:
+
+            manifest.txt    Required. Package metadata with key=value
+                            pairs: name, version, description, type.
+
+            bin/            Optional. Executable scripts (.cs files)
+                            installed to /usr/local/bin/.
+
+            lib/            Optional. Library files (.cs files)
+                            installed to /usr/local/lib/.
+
+            man/            Optional. Manual pages (.txt files)
+                            installed to /usr/share/man/.
+
+        MANIFEST FORMAT
+            name=mypackage
+            version=1.0
+            description=A useful tool
+            type=app
+
+            The 'type' field can be 'app' or 'lib'.
+
+        SUBCOMMANDS
+            install <path>  Install a .npak package from the VFS
+            remove <name>   Remove an installed package and its files
+            list            List all installed packages
+            info <name>     Show package details and installed files
+
+        EXAMPLES
+            npak install /tmp/myapp.npak
+            npak list
+            npak info myapp
+            npak remove myapp
+
+        CREATING A PACKAGE
+            1. Create a directory with your files:
+                 mkdir /tmp/myapp
+                 mkdir /tmp/myapp/bin
+                 cp myscript.cs /tmp/myapp/bin/myscript.cs
+                 echo "name=myapp" > /tmp/myapp/manifest.txt
+                 echo "version=1.0" >> /tmp/myapp/manifest.txt
+                 echo "description=My application" >> /tmp/myapp/manifest.txt
+                 echo "type=app" >> /tmp/myapp/manifest.txt
+
+            2. Zip it with the .npak extension:
+                 zip /tmp/myapp.npak /tmp/myapp
+
+            3. Install:
+                 npak install /tmp/myapp.npak
+
+        FILES
+            /var/lib/npak/          Package receipt database
+            /usr/local/bin/         Installed executables
+            /usr/local/lib/         Installed libraries
+            /usr/share/man/         Installed man pages
+
+        SEE ALSO
+            zip, unzip, importfile
+        """;
+
     public const string ImportFile = """
         IMPORTFILE(8)             NetNIX Manual             IMPORTFILE(8)
 
