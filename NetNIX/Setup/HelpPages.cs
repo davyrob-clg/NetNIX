@@ -1732,6 +1732,53 @@ public static class HelpPages
             source, help, man api, man scripting
         """;
 
+    public const string Export = """
+        EXPORT(8)                 NetNIX Manual                 EXPORT(8)
+
+        NAME
+            export - export the virtual filesystem to a host zip archive
+
+        SYNOPSIS
+            export [options] <host-path> [vfs-root]
+
+        DESCRIPTION
+            Exports the contents of the NetNIX virtual filesystem (or a
+            subtree) to a standard zip archive on the host operating system.
+
+            By default, mounted filesystems (e.g. /mnt/*) are excluded
+            from the export. Use --mounts to include them.
+
+            The exported zip contains the raw files and directories without
+            VFS metadata (permissions, ownership). It is a plain zip that
+            can be opened with any archive tool on the host.
+
+            Only root (uid 0) can export the filesystem.
+
+        ARGUMENTS
+            <host-path>     Full path on the host OS for the output zip
+            [vfs-root]      VFS path to export from (default: / for all)
+
+        OPTIONS
+            -m, --mounts    Include mounted filesystems in the export
+            -h, --help      Show help
+
+        EXAMPLES
+            export C:\Backups\netnix-full.zip
+            export C:\Backups\netnix-full.zip /
+            export --mounts C:\Backups\everything.zip
+            export C:\Backups\home-alice.zip /home/alice
+            export C:\Backups\etc-backup.zip /etc
+
+        NOTES
+            VFS metadata (permissions, owners, groups) is not included.
+            Mounted filesystems are excluded by default.
+            To back up the full rootfs with metadata, copy the rootfs.zip
+            file directly from the host AppData directory.
+
+        SEE ALSO
+            mount, umount, zip, unzip
+        """;
+
     public const string Mount = """
         MOUNT(8)                  NetNIX Manual                  MOUNT(8)
 

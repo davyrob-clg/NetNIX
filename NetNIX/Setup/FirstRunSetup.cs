@@ -438,6 +438,7 @@ public static class FirstRunSetup
             ["groupadd"]    = HelpPages.Groupadd,
             ["groupdel"]    = HelpPages.Groupdel,
             ["groupmod"]    = HelpPages.Groupmod,
+            ["export"]      = HelpPages.Export,
             ["mount"]       = HelpPages.Mount,
             ["umount"]      = HelpPages.Umount,
             ["source"]      = HelpPages.Source,

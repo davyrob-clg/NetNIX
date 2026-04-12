@@ -315,7 +315,10 @@ public sealed class VirtualFileSystem
         mountPoint = NormalizePath(mountPoint);
 
         if (!File.Exists(hostPath))
-            throw new FileNotFoundException($"Host file not found: {hostPath}");
+        {
+            Console.Error.WriteLine($"mount: {hostPath}: no such file on host");
+            return -1;
+        }
 
         // Create mount point directory if needed
         if (!_nodes.ContainsKey(mountPoint))
@@ -471,6 +474,83 @@ public sealed class VirtualFileSystem
         _mountPoints.OrderBy(kv => kv.Key)
             .Select(kv => (kv.Key, kv.Value, _autoSaveMounts.Contains(kv.Key)))
             .ToArray();
+
+    // ?? Export ?????????????????????????????????????????????????????
+
+    /// <summary>
+    /// Export VFS contents under <paramref name="vfsRoot"/> to a zip archive
+    /// on the host filesystem at <paramref name="hostPath"/>.
+    /// Mounted filesystems are excluded unless <paramref name="includeMounts"/> is true.
+    /// Returns the number of files exported.
+    /// </summary>
+    public int ExportToZip(string hostPath, string vfsRoot = "/", bool includeMounts = false)
+    {
+        vfsRoot = NormalizePath(vfsRoot);
+        string prefix = vfsRoot == "/" ? "/" : vfsRoot + "/";
+
+        FileStream stream;
+        try
+        {
+            stream = File.Create(hostPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"export: {hostPath}: {ex.Message}");
+            return -1;
+        }
+
+        using (stream)
+        using (var zip = new ZipArchive(stream, ZipArchiveMode.Create))
+        {
+            int count = 0;
+            foreach (var (path, node) in _nodes.OrderBy(kv => kv.Key))
+            {
+                // Skip root itself
+                if (path == "/") continue;
+
+                // Skip mounted content unless opted in
+                if (!includeMounts && IsMounted(path)) continue;
+
+                // Must be at or under the export root
+                string entryName;
+                if (vfsRoot == "/")
+                {
+                    entryName = path.TrimStart('/');
+                }
+                else if (path == vfsRoot)
+                {
+                    continue; // skip the root directory entry itself
+                }
+                else if (path.StartsWith(prefix))
+                {
+                    entryName = path[prefix.Length..];
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(entryName)) continue;
+
+                if (node.IsDirectory)
+                {
+                    zip.CreateEntry(entryName + "/");
+                }
+                else
+                {
+                    var entry = zip.CreateEntry(entryName, CompressionLevel.SmallestSize);
+                    if (node.Data != null)
+                    {
+                        using var es = entry.Open();
+                        es.Write(node.Data, 0, node.Data.Length);
+                    }
+                    count++;
+                }
+            }
+
+            return count;
+        }
+    }
 
     // ?? Helpers ????????????????????????????????????????????????????
 
