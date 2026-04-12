@@ -203,9 +203,12 @@ public sealed class NixShell
             whoami  id  uname  hostname  date  env
             basename  dirname  du  df  yes  true  false
             curl  wget  fetch  cbpaste  cbcopy  zip  unzip
-            mount  umount  export  importfile  npak  npak-demo
+
+          System admin commands (/sbin/*.cs — root/sudo):
             useradd  userdel  usermod
             groupadd  groupdel  groupmod
+            mount  umount  export  importfile
+            npak  npak-demo
 
           Help topics:
             man api             NixApi scripting reference

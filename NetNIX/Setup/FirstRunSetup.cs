@@ -347,7 +347,9 @@ public static class FirstRunSetup
                 fs.CreateFile(path, 0, 0, data, "rwxr-xr-x");
         }
 
-        Console.WriteLine($"  Installed {scripts.Count} commands in /bin/");
+        int binCount = scripts.Count(kv => kv.Key.StartsWith("/bin/"));
+        int sbinCount = scripts.Count(kv => kv.Key.StartsWith("/sbin/"));
+        Console.WriteLine($"  Installed {binCount} commands in /bin/, {sbinCount} in /sbin/");
     }
 
     private static void InstallBuiltinLibs(VirtualFileSystem fs)

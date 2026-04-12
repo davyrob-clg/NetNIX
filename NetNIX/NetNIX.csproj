@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetNIX ICON 1.ico" />
+    <Content Include="readme.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <None Update="extra.zip">

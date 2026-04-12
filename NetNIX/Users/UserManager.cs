@@ -221,8 +221,18 @@ public sealed class UserManager
 
     public void AddUserToGroup(string username, string groupName)
     {
-        var user = GetUser(username) ?? throw new InvalidOperationException($"User '{username}' not found.");
-        var group = GetGroup(groupName) ?? throw new InvalidOperationException($"Group '{groupName}' not found.");
+        var user = GetUser(username);
+        if (user == null)
+        {
+            Console.WriteLine($"usermod: user '{username}' not found");
+            return;
+        }
+        var group = GetGroup(groupName);
+        if (group == null)
+        {
+            Console.WriteLine($"usermod: group '{groupName}' not found");
+            return;
+        }
         if (!group.Members.Contains(username))
         {
             group.Members.Add(username);

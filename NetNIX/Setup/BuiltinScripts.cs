@@ -10,9 +10,27 @@ public static class BuiltinScripts
     private static readonly string BuiltinsDir =
         Path.Combine(AppContext.BaseDirectory, "Builtins");
 
+    // Scripts that require root privileges are installed to /sbin/.
+    private static readonly HashSet<string> SbinScripts = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "useradd.cs",
+        "userdel.cs",
+        "usermod.cs",
+        "groupadd.cs",
+        "groupdel.cs",
+        "groupmod.cs",
+        "mount.cs",
+        "umount.cs",
+        "export.cs",
+        "importfile.cs",
+        "npak.cs",
+        "npak-demo.cs",
+    };
+
     /// <summary>
-    /// Returns a dictionary mapping VFS install paths (/bin/name.cs) to
-    /// the source code read from the on-disk Builtins/ directory.
+    /// Returns a dictionary mapping VFS install paths to the source code
+    /// read from the on-disk Builtins/ directory.
+    /// Root-only commands go to /sbin/, everything else to /bin/.
     /// </summary>
     public static Dictionary<string, string> LoadAll()
     {
@@ -27,7 +45,8 @@ public static class BuiltinScripts
         foreach (var file in Directory.GetFiles(BuiltinsDir, "*.cs"))
         {
             string filename = Path.GetFileName(file);
-            string vfsPath = "/bin/" + filename;
+            string dir = SbinScripts.Contains(filename) ? "/sbin/" : "/bin/";
+            string vfsPath = dir + filename;
             string source = File.ReadAllText(file);
             scripts[vfsPath] = source;
         }

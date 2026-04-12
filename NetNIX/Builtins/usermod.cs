@@ -53,6 +53,12 @@ public static class UsermodCommand
 
         string username = argList[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("usermod: permission denied (must be root)");
+            return 1;
+        }
+
         try
         {
             if (home != null || shell != null)

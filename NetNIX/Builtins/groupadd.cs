@@ -20,6 +20,12 @@ public static class GroupaddCommand
 
         string name = args[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("groupadd: permission denied (must be root)");
+            return 1;
+        }
+
         try
         {
             api.CreateGroup(name);

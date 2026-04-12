@@ -33,6 +33,12 @@ public static class GroupmodCommand
 
         string groupName = argList[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("groupmod: permission denied (must be root)");
+            return 1;
+        }
+
         try
         {
             if (newName != null)

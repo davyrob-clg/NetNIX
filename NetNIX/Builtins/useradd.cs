@@ -52,6 +52,12 @@ public static class UseraddCommand
 
         string username = argList[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("useradd: permission denied (must be root)");
+            return 1;
+        }
+
         if (password == null)
         {
             password = username; // default password = username

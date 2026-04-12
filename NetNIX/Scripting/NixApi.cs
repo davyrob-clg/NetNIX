@@ -368,22 +368,26 @@ public sealed class NixApi
 
     // ?? User management (root only) ????????????????????????????????
 
-    /// <summary>Throws if caller is not root (uid 0).</summary>
-    private void RequireRoot(string cmd)
+    /// <summary>Prints a permission error if caller is not root. Returns true if root.</summary>
+    private bool RequireRoot(string cmd)
     {
         if (Uid != 0)
-            throw new UnauthorizedAccessException($"{cmd}: Permission denied (must be root)");
+        {
+            Console.Error.WriteLine($"{cmd}: permission denied (must be root)");
+            return false;
+        }
+        return true;
     }
 
     public void CreateUser(string username, string password, string? home = null)
     {
-        RequireRoot("useradd");
+        if (!RequireRoot("useradd")) return;
         _userMgr.CreateUser(username, password, home);
     }
 
     public void DeleteUser(string username, bool removeHome = false)
     {
-        RequireRoot("userdel");
+        if (!RequireRoot("userdel")) return;
         if (removeHome) _userMgr.DeleteUserHomeDirectory(username);
         _userMgr.DeleteUser(username);
     }
@@ -391,25 +395,28 @@ public sealed class NixApi
     public void ChangePassword(string username, string newPassword)
     {
         if (Uid != 0 && username != Username)
-            throw new UnauthorizedAccessException("passwd: Permission denied");
+        {
+            Console.Error.WriteLine("passwd: permission denied");
+            return;
+        }
         _userMgr.ChangePassword(username, newPassword);
     }
 
     public void ModifyUser(string username, string? newHome = null, string? newShell = null)
     {
-        RequireRoot("usermod");
+        if (!RequireRoot("usermod")) return;
         _userMgr.ModifyUser(username, newHome, newShell);
     }
 
     public void LockUser(string username)
     {
-        RequireRoot("usermod");
+        if (!RequireRoot("usermod")) return;
         _userMgr.LockUser(username);
     }
 
     public void UnlockUser(string username)
     {
-        RequireRoot("usermod");
+        if (!RequireRoot("usermod")) return;
         _userMgr.UnlockUser(username);
     }
 
@@ -417,31 +424,31 @@ public sealed class NixApi
 
     public void CreateGroup(string name)
     {
-        RequireRoot("groupadd");
+        if (!RequireRoot("groupadd")) return;
         _userMgr.CreateGroup(name);
     }
 
     public void DeleteGroup(string name)
     {
-        RequireRoot("groupdel");
+        if (!RequireRoot("groupdel")) return;
         _userMgr.DeleteGroup(name);
     }
 
     public void RenameGroup(string oldName, string newName)
     {
-        RequireRoot("groupmod");
+        if (!RequireRoot("groupmod")) return;
         _userMgr.RenameGroup(oldName, newName);
     }
 
     public void AddUserToGroup(string username, string groupName)
     {
-        RequireRoot("usermod");
+        if (!RequireRoot("usermod")) return;
         _userMgr.AddUserToGroup(username, groupName);
     }
 
     public void RemoveUserFromGroup(string username, string groupName)
     {
-        RequireRoot("usermod");
+        if (!RequireRoot("usermod")) return;
         _userMgr.RemoveUserFromGroup(username, groupName);
     }
 
@@ -464,7 +471,7 @@ public sealed class NixApi
     /// </summary>
     public int MountZip(string hostPath, string mountPoint, bool autoSave = false)
     {
-        RequireRoot("mount");
+        if (!RequireRoot("mount")) return -1;
         string resolvedMount = ResolvePath(mountPoint);
         return _fs.MountZip(hostPath, resolvedMount, Uid, Gid, autoSave);
     }
@@ -476,7 +483,7 @@ public sealed class NixApi
     /// </summary>
     public void Unmount(string mountPoint, bool saveChanges = false)
     {
-        RequireRoot("umount");
+        if (!RequireRoot("umount")) return;
         string resolvedMount = ResolvePath(mountPoint);
         _fs.Unmount(resolvedMount, saveChanges);
     }
@@ -487,7 +494,7 @@ public sealed class NixApi
     /// </summary>
     public void SaveMount(string mountPoint)
     {
-        RequireRoot("mount");
+        if (!RequireRoot("mount")) return;
         string resolvedMount = ResolvePath(mountPoint);
         _fs.SaveMount(resolvedMount);
     }
@@ -505,7 +512,7 @@ public sealed class NixApi
     /// </summary>
     public bool ImportFile(string hostPath, string vfsPath)
     {
-        RequireRoot("importfile");
+        if (!RequireRoot("importfile")) return false;
         string resolved = ResolvePath(vfsPath);
         return _fs.ImportFromHost(hostPath, resolved, Uid, Gid);
     }
@@ -519,7 +526,7 @@ public sealed class NixApi
     /// </summary>
     public int ExportFs(string hostPath, string vfsRoot = "/", bool includeMounts = false)
     {
-        RequireRoot("export");
+        if (!RequireRoot("export")) return -1;
         string resolved = ResolvePath(vfsRoot);
         return _fs.ExportToZip(hostPath, resolved, includeMounts);
     }

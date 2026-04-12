@@ -24,7 +24,7 @@ public sealed class ScriptRunner
     private readonly Dictionary<int, Assembly> _cache = [];
 
     // Search path for commands (in order)
-    private static readonly string[] SearchDirs = ["/bin", "/usr/bin", "/usr/local/bin"];
+    private static readonly string[] SearchDirs = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/usr/local/sbin"];
 
     public ScriptRunner(VirtualFileSystem fs, UserManager userMgr)
     {

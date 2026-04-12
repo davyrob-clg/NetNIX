@@ -24,6 +24,12 @@ public static class UserdelCommand
 
         string username = argList[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("userdel: permission denied (must be root)");
+            return 1;
+        }
+
         if (username == "root")
         {
             Console.WriteLine("userdel: cannot delete root user");

@@ -21,6 +21,12 @@ public static class GroupdelCommand
 
         string name = args[0];
 
+        if (api.Uid != 0)
+        {
+            Console.WriteLine("groupdel: permission denied (must be root)");
+            return 1;
+        }
+
         try
         {
             api.DeleteGroup(name);
