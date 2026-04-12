@@ -110,6 +110,7 @@ public sealed class NixShell
                 case "deluser": CmdDelUser(args); break;
                 case "passwd": CmdPasswd(args); break;
                 case "su": CmdSu(args); break;
+                case "sudo": CmdSudo(args); break;
                 case "users": CmdUsers(); break;
                 case "groups": CmdGroups(); break;
                 case "stat": CmdStat(args); break;
@@ -193,7 +194,7 @@ public sealed class NixShell
 
           Shell builtins:
             help  man  cd  edit  write  chmod  chown  stat  tree
-            adduser  deluser  passwd  su  users  groups
+            adduser  deluser  passwd  su  sudo  users  groups
             run  source  clear  exit/logout
 
           Script commands (/bin/*.cs):
@@ -583,6 +584,61 @@ public sealed class NixShell
         _cwd = target.HomeDirectory;
         if (!_fs.Exists(_cwd)) _cwd = "/";
         Console.WriteLine($"Switched to {target.Username}");
+    }
+
+    private void CmdSudo(List<string> args)
+    {
+        if (args.Count == 0)
+        {
+            Console.WriteLine("sudo: usage: sudo <command> [args...]");
+            return;
+        }
+
+        // Root doesn't need sudo
+        if (_currentUser.Uid == 0)
+        {
+            Execute(string.Join(' ', args));
+            return;
+        }
+
+        // Check that the current user is in the 'sudo' group
+        var sudoGroup = _userMgr.GetGroup("sudo");
+        if (sudoGroup == null || !sudoGroup.Members.Contains(_currentUser.Username))
+        {
+            Console.WriteLine($"sudo: {_currentUser.Username} is not in the sudo group");
+            return;
+        }
+
+        // Prompt for the user's own password
+        Console.Write($"[sudo] password for {_currentUser.Username}: ");
+        string? pass = ReadPassword();
+        if (pass == null || !_currentUser.VerifyPassword(pass))
+        {
+            Console.WriteLine("sudo: authentication failure");
+            return;
+        }
+
+        // Temporarily elevate to root
+        var rootUser = _userMgr.GetUser(0);
+        if (rootUser == null)
+        {
+            Console.WriteLine("sudo: root account not found");
+            return;
+        }
+
+        var previousUser = _currentUser;
+        var previousCwd = _cwd;
+        _currentUser = rootUser;
+
+        try
+        {
+            Execute(string.Join(' ', args));
+        }
+        finally
+        {
+            _currentUser = previousUser;
+            _cwd = previousCwd;
+        }
     }
 
     private void CmdUsers()

@@ -39,6 +39,10 @@ public static class FirstRunSetup
         InstallUserFiles(fs, "root", 0, 0, "/root");
         Console.WriteLine("[*] Root account created.");
 
+        // Create the sudo group so users can be granted root privileges
+        Console.WriteLine("[*] Creating sudo group...");
+        userMgr.CreateGroup("sudo");
+
         // 4. Optionally create a regular user
         Console.WriteLine();
         Console.Write("Create a regular user? (y/n): ");
@@ -62,6 +66,13 @@ public static class FirstRunSetup
 
             userMgr.CreateUser(username, userPass);
             Console.WriteLine($"[*] User '{username}' created.");
+
+            Console.Write($"Add {username} to sudo group? (y/n): ");
+            if (Console.ReadLine()?.Trim().Equals("y", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                userMgr.AddUserToGroup(username, "sudo");
+                Console.WriteLine($"[*] {username} added to sudo group.");
+            }
         }
 
         // 5. Write welcome motd
@@ -369,6 +380,7 @@ public static class FirstRunSetup
             ["deluser"]     = HelpPages.Deluser,
             ["passwd"]      = HelpPages.Passwd,
             ["su"]          = HelpPages.Su,
+            ["sudo"]        = HelpPages.Sudo,
             ["stat"]        = HelpPages.Stat,
             ["tree"]        = HelpPages.Tree,
             ["run"]         = HelpPages.Run,

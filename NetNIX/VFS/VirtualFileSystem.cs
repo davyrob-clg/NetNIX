@@ -30,6 +30,10 @@ public sealed class VirtualFileSystem
         if (!File.Exists(_archivePath))
             return;
 
+        var fi = new FileInfo(_archivePath);
+        if (fi.Length == 0)
+            return;
+
         using var stream = File.OpenRead(_archivePath);
         using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
 
@@ -82,44 +86,47 @@ public sealed class VirtualFileSystem
 
     public void Save()
     {
-        using var stream = File.Create(_archivePath);
-        using var zip = new ZipArchive(stream, ZipArchiveMode.Create);
-
-        var metaSb = new StringBuilder();
-
-        foreach (var (path, node) in _nodes.OrderBy(kv => kv.Key))
+        string tempPath = _archivePath + ".tmp";
+        using (var stream = File.Create(tempPath))
+        using (var zip = new ZipArchive(stream, ZipArchiveMode.Create))
         {
-            if (path == "/") continue; // root is implicit
+            var metaSb = new StringBuilder();
 
-            // Skip nodes that belong to a mounted archive (transient)
-            if (IsMounted(path)) continue;
-
-            string entryName = path.TrimStart('/');
-
-            if (node.IsDirectory)
+            foreach (var (path, node) in _nodes.OrderBy(kv => kv.Key))
             {
-                zip.CreateEntry(entryName + "/");
-            }
-            else
-            {
-                var entry = zip.CreateEntry(entryName, CompressionLevel.SmallestSize);
-                if (node.Data != null)
+                if (path == "/") continue; // root is implicit
+
+                // Skip nodes that belong to a mounted archive (transient)
+                if (IsMounted(path)) continue;
+
+                string entryName = path.TrimStart('/');
+
+                if (node.IsDirectory)
                 {
-                    using var es = entry.Open();
-                    es.Write(node.Data, 0, node.Data.Length);
+                    zip.CreateEntry(entryName + "/");
                 }
+                else
+                {
+                    var entry = zip.CreateEntry(entryName, CompressionLevel.SmallestSize);
+                    if (node.Data != null)
+                    {
+                        using var es = entry.Open();
+                        es.Write(node.Data, 0, node.Data.Length);
+                    }
+                }
+
+                metaSb.AppendLine($"{path}\t{node.OwnerId}\t{node.GroupId}\t{node.Permissions}");
             }
 
-            metaSb.AppendLine($"{path}\t{node.OwnerId}\t{node.GroupId}\t{node.Permissions}");
+            // Write metadata
+            var meta = zip.CreateEntry(".vfsmeta");
+            using (var ms = meta.Open())
+            using (var writer = new StreamWriter(ms))
+            {
+                writer.Write(metaSb.ToString());
+            }
         }
-
-        // Write metadata
-        var meta = zip.CreateEntry(".vfsmeta");
-        using (var ms = meta.Open())
-        using (var writer = new StreamWriter(ms))
-        {
-            writer.Write(metaSb.ToString());
-        }
+        File.Move(tempPath, _archivePath, overwrite: true);
     }
 
     // ?? Query ??????????????????????????????????????????????????????
