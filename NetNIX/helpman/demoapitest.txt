@@ -1,0 +1,19 @@
+        DEMOAPITEST(1)            NetNIX Manual            DEMOAPITEST(1)
+
+        NAME
+            demoapitest - demonstrate the #include library system
+
+        SYNOPSIS
+            demoapitest
+
+        DESCRIPTION
+            A demo command that uses #include <demoapilib> to show how
+            scripts can import and use shared library code.
+
+            The demo exercises every method in DemoApiLib:
+            formatted output, file scanning, directory sizing,
+            system info, and table formatting.
+
+        SEE ALSO
+            man include, man demoapilib, man scripting
+        

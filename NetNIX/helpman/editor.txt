@@ -1,0 +1,53 @@
+        EDITOR(7)                 NetNIX Manual                 EDITOR(7)
+
+        NAME
+            editor - nedit text editor guide
+
+        OVERVIEW
+            nedit is a nano-style full-screen editor built into NetNIX.
+            Launch it with: edit <filename>
+
+        INTERFACE
+            ?? Title bar ??? filename, modified status, cursor position ??
+            ?  1 ? line content                                          ?
+            ?  2 ? line content                                          ?
+            ?  ~ ?                                     (empty lines)     ?
+            ?? Status ??? save confirmation, errors ??????????????????????
+            ?? Shortcut bar ??? ^S Save  ^Q Quit  ^T Template ???????????
+
+        NAVIGATION
+            Arrow keys          Move cursor
+            Home / End          Start / end of line
+            Page Up / Down      Scroll by screen
+            Ctrl+G              Jump to line number
+
+        EDITING
+            Type                Insert characters
+            Enter               New line (auto-indents)
+            Tab                 Insert 4 spaces
+            Backspace           Delete backward (merges lines)
+            Delete              Delete forward (merges lines)
+            Ctrl+K              Cut entire line
+            Ctrl+U              Paste cut line
+
+        FILE OPERATIONS
+            F2 / Ctrl+W         Save
+            Ctrl+Q              Quit (prompts if unsaved)
+            F10                 Quit (alternative)
+
+        C# TEMPLATES (Ctrl+T)
+            Quick-insert code skeletons:
+            1 - Script      Ready-to-run NixApi script
+            2 - Class       Class with constructor
+            3 - Main        Script with arg parsing
+            4 - Snippet     Common API usage examples
+
+        TIPS
+            - Auto-indent matches the current line's leading spaces
+            - Line numbers are shown in the gutter
+            - The title bar shows your cursor position (Ln, Col)
+            - Templates suppress auto-indent for clean insertion
+
+        SEE ALSO
+            man scripting, man api
+        

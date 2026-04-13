@@ -1,0 +1,28 @@
+        CD(1)                     NetNIX Manual                     CD(1)
+
+        NAME
+            cd - change working directory
+
+        SYNOPSIS
+            cd [dir]
+            cd ~
+            cd -
+
+        DESCRIPTION
+            Change the current working directory.
+
+            cd              Go to home directory
+            cd ~            Go to home directory
+            cd <dir>        Go to specified directory
+            cd -            Go to previous directory (simplified)
+            cd ..           Go up one level
+            cd /            Go to root
+
+        EXAMPLES
+            cd /home/user
+            cd ..
+            cd ~/projects
+
+        SEE ALSO
+            pwd, ls
+        

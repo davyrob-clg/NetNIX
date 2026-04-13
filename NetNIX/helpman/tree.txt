@@ -1,0 +1,20 @@
+        TREE(1)                   NetNIX Manual                   TREE(1)
+
+        NAME
+            tree - display directory tree
+
+        SYNOPSIS
+            tree [dir]
+
+        DESCRIPTION
+            Show a recursive tree view of a directory and all its
+            contents. Defaults to the current directory.
+
+        EXAMPLES
+            tree
+            tree /usr
+            tree /home
+
+        SEE ALSO
+            ls, find
+        

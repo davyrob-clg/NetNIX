@@ -1,0 +1,11 @@
+        HOSTNAME(1)               NetNIX Manual               HOSTNAME(1)
+
+        NAME
+            hostname - print system hostname
+
+        SYNOPSIS
+            hostname
+
+        SEE ALSO
+            uname, env
+        

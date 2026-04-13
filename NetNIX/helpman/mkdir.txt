@@ -1,0 +1,18 @@
+        MKDIR(1)                  NetNIX Manual                  MKDIR(1)
+
+        NAME
+            mkdir - create directories
+
+        SYNOPSIS
+            mkdir [-p] <dir> [dir2...]
+
+        OPTIONS
+            -p          Create parent directories as needed
+
+        EXAMPLES
+            mkdir myproject
+            mkdir -p /home/user/src/project/lib
+
+        SEE ALSO
+            rmdir, ls
+        

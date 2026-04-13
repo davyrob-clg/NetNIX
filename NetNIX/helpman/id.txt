@@ -1,0 +1,15 @@
+        ID(1)                     NetNIX Manual                     ID(1)
+
+        NAME
+            id - print user and group IDs
+
+        SYNOPSIS
+            id [username]
+
+        EXAMPLES
+            id
+            id alice
+
+        SEE ALSO
+            whoami, users, groups
+        

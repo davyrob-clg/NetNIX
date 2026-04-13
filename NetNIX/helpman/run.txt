@@ -1,0 +1,29 @@
+        RUN(1)                    NetNIX Manual                    RUN(1)
+
+        NAME
+            run - compile and execute a .cs script
+
+        SYNOPSIS
+            run <file.cs> [args...]
+
+        DESCRIPTION
+            Compile a C# script file and execute it. The script must
+            contain a class with:
+
+                static int Run(NixApi api, string[] args)
+
+            Scripts are compiled with Roslyn at runtime. Compiled
+            assemblies are cached in memory for faster re-execution.
+
+        EXAMPLES
+            run hello.cs
+            run /home/user/tool.cs --verbose
+
+        NOTES
+            Scripts in the current directory or /bin can also be run
+            by name without 'run':
+                hello           runs ./hello.cs or /bin/hello.cs
+
+        SEE ALSO
+            edit, man scripting, man api
+        

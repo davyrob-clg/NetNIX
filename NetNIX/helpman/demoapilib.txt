@@ -1,0 +1,55 @@
+        DEMOAPILIB(3)             NetNIX Manual             DEMOAPILIB(3)
+
+        NAME
+            demoapilib - demonstration API library
+
+        SYNOPSIS
+            #include <demoapilib>
+
+        DESCRIPTION
+            A built-in library providing helper methods for formatted
+            output, file utilities, and system information.
+
+        CLASSES
+            DemoApiLib              All methods are static
+
+        FORMATTED OUTPUT
+            DemoApiLib.PrintHeader(title)     Colored section header
+            DemoApiLib.PrintValue(label, val) Labeled value display
+            DemoApiLib.PrintOk(message)       Green success message
+            DemoApiLib.PrintError(message)    Red error message
+            DemoApiLib.PrintInfo(message)     Cyan info message
+            DemoApiLib.Separator()            Blank line
+
+        FILE UTILITIES
+            DemoApiLib.CountLines(api, path)              Line count
+            DemoApiLib.GetExtension(path)                 File extension
+            DemoApiLib.IsCsFile(path)                     Is .cs file?
+            DemoApiLib.IsShFile(path)                     Is .sh file?
+            DemoApiLib.FindByExtension(api, dir, ext)     Find files
+
+        SYSTEM INFO
+            DemoApiLib.GetSystemSummary(api)              Env summary
+            DemoApiLib.DirectorySize(api, dir)            Total dir size
+
+        STRING UTILITIES
+            DemoApiLib.Pad(text, width)                   Pad/truncate
+            DemoApiLib.TableRow((text,width), ...)        Table row
+
+        EXAMPLE
+            #include <demoapilib>
+
+            public static class MyCmd
+            {
+                public static int Run(NixApi api, string[] args)
+                {
+                    DemoApiLib.PrintHeader("My Tool");
+                    DemoApiLib.PrintValue("User", api.Username);
+                    DemoApiLib.PrintOk("Done!");
+                    return 0;
+                }
+            }
+
+        SEE ALSO
+            man include, demoapitest, man api
+        

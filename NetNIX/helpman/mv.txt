@@ -1,0 +1,15 @@
+        MV(1)                     NetNIX Manual                     MV(1)
+
+        NAME
+            mv - move or rename files
+
+        SYNOPSIS
+            mv <source> <dest>
+
+        EXAMPLES
+            mv old.txt new.txt
+            mv script.cs /bin/
+
+        SEE ALSO
+            cp, rm
+        

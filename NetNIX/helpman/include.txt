@@ -1,0 +1,68 @@
+        INCLUDE(7)                NetNIX Manual                INCLUDE(7)
+
+        NAME
+            include - C# script library include system
+
+        DESCRIPTION
+            The #include directive lets C# scripts (.cs) import shared
+            library code before compilation. Libraries are plain .cs
+            files stored in /lib (or /usr/lib, /usr/local/lib).
+
+        SYNTAX
+            #include <libname>          Search /lib for libname.cs
+            #include "path/to/file.cs"  Include by relative/absolute path
+
+            The directive must be on its own line. It is processed before
+            compilation � the library source is merged into the script.
+
+        LIBRARY SEARCH ORDER
+            1. /lib/<name>.cs
+            2. /usr/lib/<name>.cs
+            3. /usr/local/lib/<name>.cs
+
+        CREATING A LIBRARY
+            Libraries are normal .cs files without a Run() method.
+            They typically contain utility classes and static methods:
+
+                edit /lib/myutils.cs
+
+            Example library:
+                public static class MyUtils
+                {
+                    public static void Greet(string name)
+                    {
+                        Console.WriteLine($"Hello, {name}!");
+                    }
+                }
+
+        USING A LIBRARY
+            In any .cs script, add an #include at the top:
+
+                using System;
+                using NetNIX.Scripting;
+
+                #include <myutils>
+
+                public static class MyCommand
+                {
+                    public static int Run(NixApi api, string[] args)
+                    {
+                        MyUtils.Greet(api.Username);
+                        return 0;
+                    }
+                }
+
+        FEATURES
+            - Recursive includes (libraries can include other libraries)
+            - Circular include detection (automatically skipped)
+            - Cached compilation (same combined source ? same assembly)
+
+        BUILT-IN LIBRARIES
+            demoapilib      Formatted output, file utils, system info
+
+        DEMO
+            Run 'demoapitest' to see #include in action.
+
+        SEE ALSO
+            man api, man scripting, run, edit
+        

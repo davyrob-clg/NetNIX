@@ -1,0 +1,100 @@
+        HTTPD(8)                  NetNIX Manual                  HTTPD(8)
+
+        NAME
+            httpd - NetNIX HTTP server daemon
+
+        SYNOPSIS
+            daemon start httpd [port] [web-root]
+            daemon stop httpd
+            httpd                       (prints help only)
+
+        DESCRIPTION
+            A simple HTTP file server daemon for NetNIX. Serves files
+            from the virtual filesystem over HTTP on localhost.
+
+            httpd is a daemon script — it runs in the background via
+            the daemon command and listens for HTTP requests until
+            stopped.
+
+        ARGUMENTS
+            port        The TCP port to listen on (default: 8080)
+            web-root    The VFS directory to serve (default: /var/www)
+
+        FEATURES
+            - Serves any file from the VFS web root
+            - Automatic directory listing for directories
+            - Creates a default index.html if none exists
+            - Content-type detection for common file types
+              (.html, .css, .js, .json, .txt, .cs, .png, .jpg, etc.)
+            - 404 responses for missing files
+            - Path traversal prevention (.. is stripped)
+            - Graceful shutdown via daemon stop
+
+        SETUP
+            httpd requires sandbox exceptions because it uses
+            System.Net.HttpListener, which is normally blocked.
+
+            1. Edit /etc/sandbox.exceptions as root:
+
+                edit /etc/sandbox.exceptions
+
+            2. Add (or uncomment) these two lines:
+
+                httpd  System.Net
+                httpd  HttpListener(
+
+            3. Save and exit the editor.
+
+        USAGE
+            # Start on the default port (8080)
+            daemon start httpd
+
+            # Start on a specific port
+            daemon start httpd 9000
+
+            # Start with a custom web root
+            daemon start httpd 8080 /home/alice/website
+
+            # Check that it's running
+            daemon list
+            daemon status httpd
+
+            # Visit in a browser
+            # http://localhost:8080/
+
+            # Stop the server
+            daemon stop httpd
+
+        WEB ROOT
+            The default web root is /var/www. httpd creates this
+            directory and a default index.html on first start if
+            they don't already exist.
+
+            To add content:
+                echo "<h1>Hello!</h1>" > /var/www/index.html
+                mkdir /var/www/css
+                echo "body { color: #333; }" > /var/www/css/style.css
+
+        TROUBLESHOOTING
+            "failed to start on port XXXX"
+                The port may be in use or require elevated privileges.
+                Try a different port (e.g., 8080, 9000).
+                Port 80 may require OS-level admin privileges.
+
+            "blocked — 'using System.Net' is not permitted"
+                Sandbox exceptions are not configured. See SETUP above.
+
+            Browser says "connection refused"
+                Make sure you include the port in the URL:
+                    http://localhost:8080/
+                Not:
+                    http://localhost/
+
+        FILES
+            /var/www                Default web root directory
+            /var/www/index.html     Default home page
+            /sbin/httpd.cs          The daemon script
+            /etc/sandbox.exceptions Sandbox overrides (must be configured)
+
+        SEE ALSO
+            daemon, man daemon-writing, man sandbox.exceptions

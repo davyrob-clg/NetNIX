@@ -1,0 +1,11 @@
+        PWD(1)                    NetNIX Manual                    PWD(1)
+
+        NAME
+            pwd - print working directory
+
+        SYNOPSIS
+            pwd
+
+        SEE ALSO
+            cd, ls
+        

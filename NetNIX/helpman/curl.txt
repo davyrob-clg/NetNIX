@@ -1,0 +1,32 @@
+        CURL(1)                   NetNIX Manual                   CURL(1)
+
+        NAME
+            curl - transfer data from a URL
+
+        SYNOPSIS
+            curl [options] <url>
+
+        DESCRIPTION
+            Perform HTTP requests from the NetNIX shell. Supports GET,
+            POST, PUT, DELETE with custom headers and body.
+
+        OPTIONS
+            -X METHOD            HTTP method (GET, POST, PUT, DELETE)
+            -d DATA              Request body (implies POST if no -X)
+            -H "Header: Value"   Add a request header
+            --content-type TYPE  Content type (default: application/json)
+            -o FILE              Save response body to a VFS file
+            -i                   Include response headers in output
+            -I                   HEAD request only (show status code)
+            -s                   Silent mode (suppress error messages)
+
+        EXAMPLES
+            curl https://example.com
+            curl -X POST -d '{"key":"val"}' https://httpbin.org/post
+            curl -H "Accept: text/plain" https://httpbin.org/get
+            curl -o page.html https://example.com
+            curl -I https://example.com
+
+        SEE ALSO
+            fetch, wget, man api
+        

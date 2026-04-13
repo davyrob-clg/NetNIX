@@ -1,0 +1,15 @@
+        DELUSER(1)                NetNIX Manual                DELUSER(1)
+
+        NAME
+            deluser - delete a user account
+
+        SYNOPSIS
+            deluser <username>
+
+        DESCRIPTION
+            Remove a user account and their personal group. Only root
+            can delete users. The home directory is NOT removed.
+
+        SEE ALSO
+            adduser, users
+        

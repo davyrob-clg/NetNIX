@@ -1,0 +1,52 @@
+        NETLIB(3)                 NetNIX Manual                 NETLIB(3)
+
+        NAME
+            netlib - networking utility library for scripts
+
+        SYNOPSIS
+            #include <netlib>
+
+        DESCRIPTION
+            A library providing helper methods for common HTTP patterns.
+
+        METHODS
+            NetLib.GetOrDefault(api, url, fallback)
+                Fetch URL, return fallback on failure.
+
+            NetLib.Ping(api, url)
+                Check if URL is reachable (returns bool).
+
+            NetLib.FetchAll(api, url1, url2, ...)
+                Fetch multiple URLs, returns (url, body)[] array.
+
+            NetLib.PostJson(api, url, json)
+                POST JSON, returns response body.
+
+            NetLib.DownloadWithStatus(api, url, path)
+                Download to VFS, returns status message string.
+
+            NetLib.JsonValue(json, key)
+                Extract a value from JSON by key name.
+                Basic pattern match (not a full parser).
+
+            NetLib.FormatHeaders(response)
+                Format NixHttpResponse headers as string.
+
+        EXAMPLE
+            #include <netlib>
+
+            public static class MyCmd
+            {
+                public static int Run(NixApi api, string[] args)
+                {
+                    string body = NetLib.GetOrDefault(api,
+                        "https://httpbin.org/get", "{}");
+                    string origin = NetLib.JsonValue(body, "origin");
+                    Console.WriteLine($"Your IP: {origin}");
+                    return 0;
+                }
+            }
+
+        SEE ALSO
+            man include, man api, curl, fetch, wget
+        

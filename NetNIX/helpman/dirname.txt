@@ -1,0 +1,14 @@
+        DIRNAME(1)                NetNIX Manual                DIRNAME(1)
+
+        NAME
+            dirname - strip filename from path
+
+        SYNOPSIS
+            dirname <path>
+
+        EXAMPLES
+            dirname /bin/ls.cs           ? /bin
+
+        SEE ALSO
+            basename
+        

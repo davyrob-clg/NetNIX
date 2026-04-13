@@ -24,6 +24,11 @@
     <Compile Remove="Libs\**" />
     <Content Include="Libs\*.cs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <!-- Man pages: plain text files copied to output -->
+  <ItemGroup>
+    <Content Include="helpman\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="NetNIX ICON 1.ico" />
     <Content Include="readme.txt" CopyToOutputDirectory="PreserveNewest" />

@@ -1,0 +1,21 @@
+        WGET(1)                   NetNIX Manual                   WGET(1)
+
+        NAME
+            wget - download a file from a URL into the VFS
+
+        SYNOPSIS
+            wget <url> [output-file]
+
+        DESCRIPTION
+            Download a file from the internet and save it to the virtual
+            filesystem. If no output filename is given, it is derived
+            from the URL.
+
+        EXAMPLES
+            wget https://example.com/file.txt
+            wget https://example.com/data.json mydata.json
+            wget https://example.com/ index.html
+
+        SEE ALSO
+            curl, fetch, man api
+        

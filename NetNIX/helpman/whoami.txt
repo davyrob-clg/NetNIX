@@ -1,0 +1,11 @@
+        WHOAMI(1)                 NetNIX Manual                 WHOAMI(1)
+
+        NAME
+            whoami - print current username
+
+        SYNOPSIS
+            whoami
+
+        SEE ALSO
+            id, users, su
+        

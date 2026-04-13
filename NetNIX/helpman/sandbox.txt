@@ -1,0 +1,73 @@
+        SANDBOX(5)                NetNIX Manual                SANDBOX(5)
+
+        NAME
+            sandbox.conf - script sandbox security configuration
+
+        LOCATION
+            /etc/sandbox.conf
+
+        DESCRIPTION
+            Controls which .NET namespaces and API patterns are blocked
+            in user scripts (.cs files). This is the primary mechanism
+            preventing scripts from accessing the host filesystem,
+            network, processes, and other dangerous APIs directly.
+
+            The file is readable by root only (permissions rw-r-----).
+            Root or sudo users can edit it to add or remove rules.
+            Changes take effect on the next script execution.
+
+        FORMAT
+            Lines starting with # are comments.  Blank lines are ignored.
+
+            [blocked_usings]
+                Namespace prefixes. Any 'using' directive whose namespace
+                matches or starts with a listed prefix is blocked.
+
+                Example: "System.IO" blocks:
+                    using System.IO;
+                    using System.IO.Compression;
+
+            [blocked_tokens]
+                Literal strings. If any of these appear anywhere in the
+                script source (after #include expansion), the script is
+                rejected.
+
+                Example: "File.WriteAll" blocks:
+                    File.WriteAllText("...", "...");
+
+        DEFAULT RULES
+            Blocked namespaces:
+                System.IO, System.Diagnostics, System.Net,
+                System.Reflection, System.Runtime.Loader,
+                System.Runtime.InteropServices, System.Security,
+                System.CodeDom
+
+            Blocked tokens:
+                File operations (File.Create, File.Read, File.Write,
+                Directory.Create, StreamReader, StreamWriter, etc.),
+                Process spawning, network clients, reflection,
+                unsafe/interop, environment manipulation.
+
+        EXAMPLES
+            To allow scripts to use System.IO.Path (but keep the rest
+            of System.IO blocked), you could remove "System.IO" from
+            blocked_usings and instead add specific sub-namespaces:
+
+                [blocked_usings]
+                System.IO.Compression
+                System.IO.Pipes
+                # System.IO.Path is now allowed
+
+            To block a custom namespace:
+
+                [blocked_usings]
+                MyDangerous.Namespace
+
+            To block a specific method call:
+
+                [blocked_tokens]
+                SomeDangerousMethod(
+
+        SEE ALSO
+            man scripting, man permissions, man api
+        

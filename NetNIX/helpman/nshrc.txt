@@ -1,0 +1,59 @@
+        NSHRC(5)                  NetNIX Manual                  NSHRC(5)
+
+        NAME
+            nshrc - shell startup script
+
+        DESCRIPTION
+            When the nsh shell starts, it automatically sources the
+            file ~/.nshrc if it exists. This allows users to customize
+            their login experience with welcome messages, aliases, or
+            any shell commands.
+
+        FILE FORMAT
+            Plain text, one command per line:
+
+            # This is a comment
+            echo "Welcome back, $USER!"
+            date
+            cat /etc/motd
+
+            Blank lines and lines starting with # are ignored.
+            Shell variables ($USER, $UID, $HOME, etc.) are expanded.
+
+        FILES
+            ~/.nshrc            Per-user startup script
+            /etc/skel/.nshrc    Default template for new users
+
+        DEFAULT CONTENTS
+            The default .nshrc installed for each new user:
+
+            # Welcome message
+            echo "Welcome back, $USER (uid=$UID)!"
+            cat /etc/motd
+            date
+            echo "Type 'help' for commands."
+
+        CUSTOMIZATION
+            Edit your startup script:
+                edit ~/.nshrc
+
+            Example additions:
+                # Show directory listing on login
+                ls
+
+                # Show disk usage summary
+                df
+
+                # Custom greeting
+                echo "Good day, $USER. You are in $CWD."
+
+        CREATING SHELL SCRIPTS
+            Any text file can be used as a shell script:
+
+                edit myscript.sh
+                # Add commands, one per line
+                source myscript.sh
+
+        SEE ALSO
+            source, help, man api, man scripting
+        

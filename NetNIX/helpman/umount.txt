@@ -1,0 +1,31 @@
+        UMOUNT(8)                 NetNIX Manual                 UMOUNT(8)
+
+        NAME
+            umount - unmount a previously mounted archive
+
+        SYNOPSIS
+            umount [options] <mount-point>
+
+        DESCRIPTION
+            Removes a previously mounted archive from the virtual
+            filesystem. All files and directories under the mount point
+            are removed from memory.
+
+            With the --save flag, changes made to files under the mount
+            point are written back to the original host zip archive
+            before unmounting.
+
+            Without --save, all in-memory changes are discarded.
+
+            Only root (uid 0) can unmount archives.
+
+        OPTIONS
+            -s, --save      Save changes to the host zip before unmounting
+
+        EXAMPLES
+            umount /mnt/data              Discard changes and unmount
+            umount --save /mnt/data       Save changes, then unmount
+
+        SEE ALSO
+            mount, zip, unzip
+        

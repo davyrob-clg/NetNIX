@@ -1,0 +1,26 @@
+        FIND(1)                   NetNIX Manual                   FIND(1)
+
+        NAME
+            find - search for files in the filesystem
+
+        SYNOPSIS
+            find [dir] [-name <pattern>] [-type f|d]
+
+        OPTIONS
+            -name <pat>     Filter by name (* wildcards)
+            -type f         Files only
+            -type d         Directories only
+
+        PATTERNS
+            *.cs            Files ending in .cs
+            *test*          Files containing "test"
+            readme          Exact name match
+
+        EXAMPLES
+            find /bin -name *.cs
+            find / -type d
+            find /home -name *.txt -type f
+
+        SEE ALSO
+            ls, grep, tree
+        

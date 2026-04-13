@@ -1,0 +1,15 @@
+        TOUCH(1)                  NetNIX Manual                  TOUCH(1)
+
+        NAME
+            touch - create empty files
+
+        SYNOPSIS
+            touch <file> [file2...]
+
+        DESCRIPTION
+            Create an empty file if it doesn't exist. Does nothing
+            if the file already exists.
+
+        SEE ALSO
+            edit, write
+        

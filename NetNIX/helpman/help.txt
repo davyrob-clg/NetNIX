@@ -1,0 +1,18 @@
+        HELP(1)                   NetNIX Manual                   HELP(1)
+
+        NAME
+            help - show command summary
+
+        SYNOPSIS
+            help
+
+        DESCRIPTION
+            Displays a brief list of all available shell builtins and
+            script commands.
+
+            For detailed help on any command, use:
+                man <command>
+
+        SEE ALSO
+            man
+        

@@ -1,0 +1,330 @@
+        DAEMON-WRITING(7)         NetNIX Manual         DAEMON-WRITING(7)
+
+        NAME
+            daemon-writing - how to write daemon scripts for NetNIX
+
+        DESCRIPTION
+            This guide explains how to create background daemon scripts
+            that run via the daemon command. It covers the entry point,
+            graceful shutdown, sandbox exceptions, and includes a
+            complete template you can copy and modify.
+
+        ENTRY POINT
+            Daemon scripts must define a static Daemon method:
+
+                public static int Daemon(NixApi api, string[] args)
+
+            This is called on a background thread when you run:
+
+                daemon start <scriptname> [args...]
+
+            The method should run a long-lived loop and return an
+            int exit code when finished (0 = success).
+
+        GRACEFUL SHUTDOWN
+            When someone runs "daemon stop <name>", the daemon's
+            CancellationToken is triggered. Your daemon MUST check
+            this to shut down cleanly:
+
+                while (!api.DaemonToken.IsCancellationRequested)
+                {
+                    // do work
+                    Thread.Sleep(1000);
+                }
+
+            If your daemon blocks on I/O, use the token to cancel:
+
+                try
+                {
+                    task.Wait(api.DaemonToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // shutting down
+                }
+
+            If a daemon doesn't stop within 3 seconds of cancellation,
+            the system reports it as unresponsive (but the background
+            thread continues as IsBackground=true).
+
+        OPTIONAL RUN METHOD
+            You can also add a standard Run() method. This is called
+            when someone runs the script directly (not as a daemon).
+            Use it to print help or usage information:
+
+                public static int Run(NixApi api, string[] args)
+                {
+                    Console.WriteLine("Usage: daemon start myscript");
+                    return 0;
+                }
+
+        SANDBOX EXCEPTIONS
+            If your daemon needs blocked APIs (networking, file I/O,
+            etc.), you must configure sandbox exceptions.
+
+            1. Edit /etc/sandbox.exceptions as root
+            2. Add lines for your daemon:
+
+                mydaemon  System.Net
+                mydaemon  HttpListener(
+
+            See "man sandbox.exceptions" for full details.
+
+            Daemons that only use the NixApi (api.ReadText, api.Net,
+            etc.) do NOT need any sandbox exceptions.
+
+        VFS ACCESS
+            Daemons have full access to the NixApi, just like regular
+            scripts. Use it for all VFS operations:
+
+                api.ReadText("/var/www/index.html")
+                api.WriteText("/var/log/mydaemon.log", message)
+                api.IsFile("/etc/myconfig.conf")
+                api.Save()
+
+        LOGGING
+            There is no syslog in NetNIX. Daemons can:
+
+            - Write to Console.WriteLine (appears in the shell)
+            - Write to a log file in the VFS:
+
+                api.WriteText("/var/log/mydaemon.log", logEntry)
+
+            Or append with:
+
+                string existing = api.IsFile(logPath)
+                    ? api.ReadText(logPath) : "";
+                api.WriteText(logPath, existing + logEntry + "\n");
+
+        SETTINGS
+            Daemons can use settingslib for configuration:
+
+                #include <settingslib>
+
+                string port = Settings.GetSystem(api, "mydaemon",
+                    "port", "8080");
+
+            System-wide settings go in /etc/opt/<name>.conf and
+            can be set by root:
+
+                Settings.SetSystem(api, "mydaemon", "port", "9000");
+
+        TEMPLATE: MINIMAL DAEMON
+            Copy this template to create your own daemon:
+
+            ---- /sbin/mydaemon.cs ----
+
+            using System;
+            using System.Threading;
+            using NetNIX.Scripting;
+
+            public static class MyDaemon
+            {
+                public static int Daemon(NixApi api, string[] args)
+                {
+                    Console.WriteLine("mydaemon: started");
+
+                    while (!api.DaemonToken.IsCancellationRequested)
+                    {
+                        // === Your daemon logic here ===
+
+                        // Sleep or do periodic work
+                        try
+                        {
+                            Task.Delay(5000, api.DaemonToken)
+                                .GetAwaiter().GetResult();
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                    }
+
+                    Console.WriteLine("mydaemon: stopped");
+                    return 0;
+                }
+
+                public static int Run(NixApi api, string[] args)
+                {
+                    Console.WriteLine("mydaemon - my background service");
+                    Console.WriteLine();
+                    Console.WriteLine("Start:  daemon start mydaemon");
+                    Console.WriteLine("Stop:   daemon stop mydaemon");
+                    return 0;
+                }
+            }
+
+            ---- end ----
+
+        TEMPLATE: HTTP SERVER DAEMON
+            A daemon that listens for HTTP requests. Requires sandbox
+            exceptions for System.Net.
+
+            ---- /sbin/myserver.cs ----
+
+            using System;
+            using System.Net;
+            using System.Text;
+            using NetNIX.Scripting;
+
+            public static class MyServer
+            {
+                public static int Daemon(NixApi api, string[] args)
+                {
+                    int port = 9000;
+                    if (args.Length > 0 && int.TryParse(args[0], out int p))
+                        port = p;
+
+                    var listener = new HttpListener();
+                    listener.Prefixes.Add($"http://localhost:{port}/");
+                    listener.Start();
+
+                    Console.WriteLine($"myserver: listening on port {port}");
+
+                    try
+                    {
+                        while (!api.DaemonToken.IsCancellationRequested)
+                        {
+                            var ctxTask = listener.GetContextAsync();
+                            try
+                            {
+                                ctxTask.Wait(api.DaemonToken);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                break;
+                            }
+
+                            if (!ctxTask.IsCompletedSuccessfully) continue;
+                            var ctx = ctxTask.Result;
+
+                            byte[] body = Encoding.UTF8.GetBytes("Hello!");
+                            ctx.Response.ContentLength64 = body.Length;
+                            ctx.Response.OutputStream.Write(body);
+                            ctx.Response.Close();
+                        }
+                    }
+                    finally
+                    {
+                        listener.Stop();
+                        listener.Close();
+                        Console.WriteLine("myserver: stopped");
+                    }
+
+                    return 0;
+                }
+
+                public static int Run(NixApi api, string[] args)
+                {
+                    Console.WriteLine("Start: daemon start myserver [port]");
+                    Console.WriteLine("Stop:  daemon stop myserver");
+                    Console.WriteLine();
+                    Console.WriteLine("Requires sandbox exceptions:");
+                    Console.WriteLine("  myserver  System.Net");
+                    Console.WriteLine("  myserver  HttpListener(");
+                    return 0;
+                }
+            }
+
+            ---- end ----
+
+            Sandbox exceptions needed:
+                myserver  System.Net
+                myserver  HttpListener(
+
+        TEMPLATE: FILE WATCHER DAEMON
+            A daemon that periodically checks the VFS and acts on
+            changes. No sandbox exceptions needed.
+
+            ---- /sbin/watcherd.cs ----
+
+            using System;
+            using System.Threading;
+            using NetNIX.Scripting;
+
+            public static class WatcherDaemon
+            {
+                public static int Daemon(NixApi api, string[] args)
+                {
+                    string watchDir = args.Length > 0 ? args[0] : "/tmp";
+                    Console.WriteLine($"watcherd: watching {watchDir}");
+
+                    int lastCount = 0;
+
+                    while (!api.DaemonToken.IsCancellationRequested)
+                    {
+                        if (api.IsDirectory(watchDir))
+                        {
+                            var files = api.ListDirectory(watchDir);
+                            if (files.Length != lastCount)
+                            {
+                                Console.WriteLine(
+                                    $"watcherd: {watchDir} has " +
+                                    $"{files.Length} entries " +
+                                    $"(was {lastCount})");
+                                lastCount = files.Length;
+                            }
+                        }
+
+                        try
+                        {
+                            Task.Delay(3000, api.DaemonToken)
+                                .GetAwaiter().GetResult();
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                    }
+
+                    Console.WriteLine("watcherd: stopped");
+                    return 0;
+                }
+
+                public static int Run(NixApi api, string[] args)
+                {
+                    Console.WriteLine("watcherd - VFS directory watcher");
+                    Console.WriteLine("Start:  daemon start watcherd [dir]");
+                    Console.WriteLine("Stop:   daemon stop watcherd");
+                    return 0;
+                }
+            }
+
+            ---- end ----
+
+        INSTALLATION
+            Save your daemon script to /sbin/:
+
+                edit /sbin/mydaemon.cs
+
+            Or write it elsewhere and copy:
+
+                cp mydaemon.cs /sbin/
+
+        LIFECYCLE
+            1. root# daemon start mydaemon
+               -> CompileWithExceptions() compiles the script
+               -> Sandbox exceptions are checked
+               -> Daemon() is invoked on a background thread
+
+            2. root# daemon list
+               -> Shows PID, name, status, owner, start time
+
+            3. root# daemon stop mydaemon
+               -> CancellationToken is triggered
+               -> Daemon checks IsCancellationRequested and exits
+               -> Thread joins (3s timeout)
+
+            4. Daemon output goes to the console of any active shell.
+
+        CHECKLIST
+            [ ] Script has static int Daemon(NixApi, string[])
+            [ ] Daemon checks api.DaemonToken.IsCancellationRequested
+            [ ] Uses try/catch for OperationCanceledException
+            [ ] Optional: static int Run() for help text
+            [ ] If using blocked APIs: sandbox exceptions configured
+            [ ] Installed in /sbin/ (root-only commands)
+            [ ] Tested: daemon start, daemon status, daemon stop
+
+        SEE ALSO
+            man daemon, man httpd, man sandbox.exceptions, man api

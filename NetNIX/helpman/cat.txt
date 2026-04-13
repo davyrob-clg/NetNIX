@@ -1,0 +1,18 @@
+        CAT(1)                    NetNIX Manual                    CAT(1)
+
+        NAME
+            cat - display file contents
+
+        SYNOPSIS
+            cat [-n] <file> [file2...]
+
+        OPTIONS
+            -n          Number output lines
+
+        EXAMPLES
+            cat /etc/motd
+            cat -n /bin/ls.cs
+
+        SEE ALSO
+            head, tail, edit
+        

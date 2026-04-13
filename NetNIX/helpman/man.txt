@@ -1,0 +1,34 @@
+        MAN(1)                    NetNIX Manual                    MAN(1)
+
+        NAME
+            man - display manual pages
+
+        SYNOPSIS
+            man <topic>
+            man -k <keyword>
+            man --list
+
+        DESCRIPTION
+            Display the manual page for a command or topic.
+
+            Pages are stored as plain text in /usr/share/man/. You can
+            add your own pages by creating files there:
+
+                edit /usr/share/man/mycommand.txt
+
+        OPTIONS
+            man <topic>       Show the manual page for <topic>
+            man -k <keyword>  Search all pages for a keyword
+            man --list        List all available manual pages
+
+        TOPICS
+            Any command name (ls, cat, grep, etc.)
+            api               NixApi scripting reference
+            scripting         How to write .cs scripts
+            editor            Text editor guide
+            filesystem        Filesystem hierarchy
+            permissions       File permission system
+
+        SEE ALSO
+            help, cat
+        

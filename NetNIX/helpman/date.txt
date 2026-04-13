@@ -1,0 +1,16 @@
+        DATE(1)                   NetNIX Manual                   DATE(1)
+
+        NAME
+            date - print current date and time
+
+        SYNOPSIS
+            date [-u] [-I] [+%s]
+
+        OPTIONS
+            -u          UTC time
+            -I          ISO 8601 date format (yyyy-MM-dd)
+            +%s         Unix timestamp (seconds since epoch)
+
+        SEE ALSO
+            env, uname
+        

@@ -1,0 +1,17 @@
+        UNAME(1)                  NetNIX Manual                  UNAME(1)
+
+        NAME
+            uname - print system information
+
+        SYNOPSIS
+            uname [-a] [-s] [-r] [-n]
+
+        OPTIONS
+            -s          System name
+            -r          Release version
+            -n          Hostname
+            -a          All information
+
+        SEE ALSO
+            hostname, env
+        

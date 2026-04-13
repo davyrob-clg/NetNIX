@@ -1,0 +1,27 @@
+        USERDEL(8)                NetNIX Manual                USERDEL(8)
+
+        NAME
+            userdel - delete a user account
+
+        SYNOPSIS
+            userdel [options] <username>
+
+        DESCRIPTION
+            Remove a user account and their personal primary group.
+            Only root can run this command.
+
+        OPTIONS
+            -r, --remove    Also delete the user's home directory
+                            and all files within it
+
+        EXAMPLES
+            userdel alice
+            userdel -r bob
+
+        NOTES
+            The root user cannot be deleted.
+            Without -r, the home directory is preserved.
+
+        SEE ALSO
+            useradd, usermod, deluser
+        

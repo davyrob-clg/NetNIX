@@ -1,0 +1,90 @@
+        SETTINGSLIB(3)            NetNIX Manual            SETTINGSLIB(3)
+
+        NAME
+            settingslib - application settings library
+
+        SYNOPSIS
+            #include <settingslib>
+
+        DESCRIPTION
+            Provides a simple key=value settings store for scripts.
+            Settings can be stored per-user or system-wide.
+
+            Per-user settings:    ~/.config/<appname>.conf
+            System-wide settings: /etc/opt/<appname>.conf
+
+            Per-user settings are private to each user. System-wide
+            settings are readable by all but writable only by root.
+
+        PER-USER API
+            Settings.Get(api, appName, key)
+                Returns the value for key, or null.
+
+            Settings.Get(api, appName, key, defaultValue)
+                Returns the value for key, or defaultValue.
+
+            Settings.Set(api, appName, key, value)
+                Sets a key-value pair.
+
+            Settings.Remove(api, appName, key)
+                Removes a key. Returns true if it existed.
+
+            Settings.GetAll(api, appName)
+                Returns all settings as a Dictionary.
+
+            Settings.Clear(api, appName)
+                Deletes all settings for the app.
+
+            Settings.ListApps(api)
+                Lists app names with per-user settings.
+
+        SYSTEM-WIDE API
+            Settings.GetSystem(api, appName, key)
+            Settings.GetSystem(api, appName, key, defaultValue)
+                Read system-wide settings (any user).
+
+            Settings.SetSystem(api, appName, key, value)
+            Settings.RemoveSystem(api, appName, key)
+            Settings.ClearSystem(api, appName)
+                Write system-wide settings (root only).
+
+            Settings.GetAllSystem(api, appName)
+                Returns all system settings as a Dictionary.
+
+            Settings.ListSystemApps(api)
+                Lists app names with system-wide settings.
+
+        HELPERS
+            Settings.GetEffective(api, appName, key, defaultValue)
+                Returns per-user value if set, otherwise system value,
+                otherwise defaultValue. Useful for layered config where
+                users can override system defaults.
+
+        FILE FORMAT
+            Settings files are plain text, one key=value per line.
+            Lines starting with # are comments.
+
+            # Settings file
+            theme=dark
+            language=en
+            font_size=14
+
+        EXAMPLES
+            #include <settingslib>
+
+            // Save user preferences
+            Settings.Set(api, "myapp", "theme", "dark");
+            Settings.Set(api, "myapp", "lang", "en");
+
+            // Read with fallback
+            string theme = Settings.Get(api, "myapp", "theme", "light");
+
+            // System defaults (root only for writing)
+            Settings.SetSystem(api, "myapp", "max_retries", "3");
+
+            // Effective value (user overrides system)
+            string val = Settings.GetEffective(api, "myapp", "theme");
+
+        SEE ALSO
+            man api, man scripting, man include, settings-demo
+        

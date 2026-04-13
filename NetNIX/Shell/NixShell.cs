@@ -215,15 +215,19 @@ public sealed class NixShell
             npak  npak-demo  httpd
 
           Help topics:
-            man api             NixApi scripting reference
-            man scripting       How to write .cs scripts
-            man include         Library #include system
-            man editor          Text editor guide
-            man filesystem      Filesystem hierarchy
-            man permissions     File permission system
-            man sandbox         Script sandbox security (/etc/sandbox.conf)
-            man settingslib     Application settings library
-            man nshrc           Shell startup scripts
+            man api                  NixApi scripting reference
+            man scripting            How to write .cs scripts
+            man include              Library #include system
+            man editor               Text editor guide
+            man filesystem           Filesystem hierarchy
+            man permissions          File permission system
+            man sandbox              Script sandbox security
+            man sandbox.exceptions   Per-script sandbox overrides
+            man settingslib          Application settings library
+            man nshrc                Shell startup scripts
+            man daemon               Daemon management commands
+            man daemon-writing       How to write daemon scripts
+            man httpd                Built-in HTTP server daemon
 
           Shell scripts:
             source <file>       Execute a shell script (one command per line)

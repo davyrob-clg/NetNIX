@@ -1,0 +1,29 @@
+        ZIP(1)                    NetNIX Manual                    ZIP(1)
+
+        NAME
+            zip - create and manage zip archives
+
+        SYNOPSIS
+            zip <archive.zip> <file|dir> [file|dir ...]
+            zip -a <archive.zip> <file> [...]
+            zip -l <archive.zip>
+
+        DESCRIPTION
+            Create zip archives from files and directories in the VFS.
+            Archives are stored as binary files and can be extracted
+            with the unzip command.
+
+        OPTIONS
+            zip <archive> <sources...>   Create new archive
+            zip -a <archive> <files...>  Add files to existing archive
+            zip -l <archive>             List archive contents
+
+        EXAMPLES
+            zip backup.zip file1.txt file2.txt
+            zip project.zip /home/user/src
+            zip -a backup.zip newfile.txt
+            zip -l backup.zip
+
+        SEE ALSO
+            unzip, man ziplib, man api
+        

@@ -1,0 +1,24 @@
+        ECHO(1)                   NetNIX Manual                   ECHO(1)
+
+        NAME
+            echo - print text
+
+        SYNOPSIS
+            echo [-n] <text...>
+
+        OPTIONS
+            -n          Do not print trailing newline
+
+        DESCRIPTION
+            Print arguments to stdout. Combine with > or >> to
+            write to files.
+
+        EXAMPLES
+            echo Hello World
+            echo -n "no newline"
+            echo "line 1" > file.txt
+            echo "line 2" >> file.txt
+
+        SEE ALSO
+            cat, write, tee
+        

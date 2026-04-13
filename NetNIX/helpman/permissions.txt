@@ -1,0 +1,47 @@
+        PERMISSIONS(7)            NetNIX Manual            PERMISSIONS(7)
+
+        NAME
+            permissions - file permission system
+
+        DESCRIPTION
+            NetNIX uses UNIX-style 9-character permission strings.
+
+        FORMAT
+            rwxrwxrwx
+            \_/\_/\_/
+             |  |  ??? Other (everyone else)
+             |  ?????? Group
+             ????????? Owner
+
+            r = read    w = write    x = execute    - = denied
+
+        OCTAL NOTATION
+            r=4  w=2  x=1
+
+            755 = rwxr-xr-x    (owner: all, others: read+exec)
+            644 = rw-r--r--    (owner: read+write, others: read)
+            700 = rwx------    (owner only)
+            777 = rwxrwxrwx    (everyone: all)
+
+        SPECIAL
+            Directories need 'x' permission to be entered (cd).
+            Scripts need 'r' permission to be executed.
+            The sticky bit 't' on /tmp prevents users from deleting
+            each other's files.
+
+        ROOT
+            Root (uid=0) bypasses all permission checks.
+
+        COMMANDS
+            chmod <mode> <path>     Change permissions
+            chown <user> <path>     Change owner (root only)
+            stat <path>             View current permissions
+
+        EXAMPLES
+            chmod 755 /bin/myscript.cs
+            chmod rw-r--r-- notes.txt
+            stat /etc/passwd
+
+        SEE ALSO
+            chmod, chown, stat
+        

@@ -1,0 +1,19 @@
+        GROUPDEL(8)               NetNIX Manual               GROUPDEL(8)
+
+        NAME
+            groupdel - delete a group
+
+        SYNOPSIS
+            groupdel <groupname>
+
+        DESCRIPTION
+            Delete an existing group. The group cannot be deleted if
+            it is the primary group of any user. Only root can run
+            this command.
+
+        EXAMPLES
+            groupdel developers
+
+        SEE ALSO
+            groupadd, groupmod, groups
+        

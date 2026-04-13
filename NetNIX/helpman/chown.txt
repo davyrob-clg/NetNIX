@@ -1,0 +1,18 @@
+        CHOWN(1)                  NetNIX Manual                  CHOWN(1)
+
+        NAME
+            chown - change file owner
+
+        SYNOPSIS
+            chown <user> <path>
+
+        DESCRIPTION
+            Change the owner of a file or directory. Only root can
+            use this command.
+
+        EXAMPLES
+            chown alice /home/alice/file.txt
+
+        SEE ALSO
+            chmod, stat
+        

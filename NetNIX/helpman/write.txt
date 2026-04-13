@@ -1,0 +1,24 @@
+        WRITE(1)                  NetNIX Manual                  WRITE(1)
+
+        NAME
+            write - write text to a file interactively
+
+        SYNOPSIS
+            write <file>
+
+        DESCRIPTION
+            Opens an interactive line-by-line text input. Type your
+            content, then enter a single '.' on a line to finish and
+            save. Creates the file if it doesn't exist.
+
+            For a full editor experience, use 'edit' instead.
+
+        EXAMPLES
+            write notes.txt
+            > This is line one
+            > This is line two
+            > .
+
+        SEE ALSO
+            edit, echo, tee
+        

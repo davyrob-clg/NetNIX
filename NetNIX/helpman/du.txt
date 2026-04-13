@@ -1,0 +1,19 @@
+        DU(1)                     NetNIX Manual                     DU(1)
+
+        NAME
+            du - estimate disk usage
+
+        SYNOPSIS
+            du [-s] [-h] [dir]
+
+        OPTIONS
+            -s          Summary (total only)
+            -h          Human-readable sizes (K, M)
+
+        EXAMPLES
+            du /home
+            du -sh /bin
+
+        SEE ALSO
+            df, ls
+        

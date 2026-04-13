@@ -1,0 +1,22 @@
+        GREP(1)                   NetNIX Manual                   GREP(1)
+
+        NAME
+            grep - search files for a pattern
+
+        SYNOPSIS
+            grep [-i] [-n] [-v] [-c] <pattern> <file> [file2...]
+
+        OPTIONS
+            -i          Case-insensitive match
+            -n          Show line numbers
+            -v          Invert match (show non-matching lines)
+            -c          Count matches only
+
+        EXAMPLES
+            grep "Console" /bin/ls.cs
+            grep -in "error" /var/log/*.txt
+            grep -c "using" /bin/cat.cs
+
+        SEE ALSO
+            find, cat
+        

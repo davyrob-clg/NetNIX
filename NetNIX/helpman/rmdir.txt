@@ -1,0 +1,15 @@
+        RMDIR(1)                  NetNIX Manual                  RMDIR(1)
+
+        NAME
+            rmdir - remove empty directories
+
+        SYNOPSIS
+            rmdir <dir> [dir2...]
+
+        DESCRIPTION
+            Remove directories only if they are empty. Use rm -r to
+            remove non-empty directories.
+
+        SEE ALSO
+            mkdir, rm
+        

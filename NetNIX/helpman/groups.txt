@@ -1,0 +1,14 @@
+        GROUPS(1)                 NetNIX Manual                 GROUPS(1)
+
+        NAME
+            groups - list all groups
+
+        SYNOPSIS
+            groups
+
+        DESCRIPTION
+            Display all groups with their GID and member list.
+
+        SEE ALSO
+            users, id
+        

@@ -1,0 +1,15 @@
+        DF(1)                     NetNIX Manual                     DF(1)
+
+        NAME
+            df - show filesystem summary
+
+        SYNOPSIS
+            df
+
+        DESCRIPTION
+            Show total size, file count, and directory count for
+            the virtual filesystem.
+
+        SEE ALSO
+            du, ls
+        

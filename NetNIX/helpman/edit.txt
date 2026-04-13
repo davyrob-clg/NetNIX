@@ -1,0 +1,40 @@
+        EDIT(1)                   NetNIX Manual                   EDIT(1)
+
+        NAME
+            edit - full-screen text editor
+
+        SYNOPSIS
+            edit <file>
+
+        DESCRIPTION
+            Opens a file in the built-in text editor (nedit). If the file
+            does not exist, it will be created on first save.
+
+        KEYBOARD SHORTCUTS
+            F2 / Ctrl+W     Save file
+            Ctrl+Q          Quit (prompts if unsaved changes)
+            Ctrl+T          Insert C# template
+            Ctrl+G          Go to line number
+            Ctrl+K          Cut current line to clipboard
+            Ctrl+U          Paste line from clipboard
+
+            Arrow keys      Move cursor
+            Home / End      Beginning / end of line
+            Page Up/Down    Scroll by screen
+            Tab             Insert 4 spaces
+            Enter           New line (auto-indents)
+
+        C# TEMPLATES (Ctrl+T)
+            1 - Script      Complete NixApi script with Run() entry point
+            2 - Class       Basic class with constructor
+            3 - Main        Script with argument parsing boilerplate
+            4 - Snippet     Common NixApi usage patterns
+
+        EXAMPLES
+            edit hello.cs          Create a new script
+            edit /bin/ls.cs        Edit an existing command
+            edit /etc/motd         Edit system message
+
+        SEE ALSO
+            write, run, man scripting
+        

@@ -1,0 +1,37 @@
+        SOURCE(1)                 NetNIX Manual                 SOURCE(1)
+
+        NAME
+            source - execute a shell script
+
+        SYNOPSIS
+            source <file>
+            . <file>
+
+        DESCRIPTION
+            Read and execute commands from a file in the current shell.
+            Each line is executed as if typed at the prompt. Blank lines
+            and lines starting with # are skipped.
+
+            The '.' command is an alias for source.
+
+        VARIABLE EXPANSION
+            The following variables are expanded before execution:
+
+            $USER       Current username
+            $UID        Current user ID
+            $GID        Current group ID
+            $HOME       Home directory
+            $CWD        Current working directory
+            $PWD        Current working directory (alias)
+            $SHELL      Shell path (/bin/nsh)
+            $HOSTNAME   System hostname (netnix)
+            ~           Expands to home directory
+
+        EXAMPLES
+            source ~/.nshrc
+            . /etc/profile
+            source setup.sh
+
+        SEE ALSO
+            man nshrc, help
+        

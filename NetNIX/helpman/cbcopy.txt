@@ -1,0 +1,30 @@
+        CBCOPY(1)                 NetNIX Manual                 CBCOPY(1)
+
+        NAME
+            cbcopy - copy a VFS file to the host clipboard
+
+        SYNOPSIS
+            cbcopy <file>
+
+        DESCRIPTION
+            Reads a text file from the virtual filesystem and copies
+            its contents to the host system's clipboard.
+
+            This bridges the NetNIX VFS with the host OS clipboard,
+            allowing you to export code, text, or data from the
+            environment to your host applications.
+
+        EXAMPLES
+            cbcopy notes.txt           Copy notes to host clipboard
+            cbcopy /bin/ls.cs          Copy a script source to clipboard
+            cbcopy ~/.nshrc            Copy startup script to clipboard
+            cbcopy /etc/motd           Copy message of the day
+
+        PLATFORM SUPPORT
+            Windows     Uses clip.exe
+            macOS       Uses pbcopy
+            Linux       Uses xclip or xsel
+
+        SEE ALSO
+            cbpaste, cat, man api
+        

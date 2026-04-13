@@ -1,0 +1,24 @@
+        LS(1)                     NetNIX Manual                     LS(1)
+
+        NAME
+            ls - list directory contents
+
+        SYNOPSIS
+            ls [-l] [-a] [dir]
+
+        DESCRIPTION
+            List files and directories. Directories shown in blue.
+
+        OPTIONS
+            -l          Long format (permissions, owner, size)
+            -a          Show hidden files (starting with .)
+            -la / -al   Both long format and hidden files
+
+        EXAMPLES
+            ls
+            ls -la /bin
+            ls /home
+
+        SEE ALSO
+            tree, find, stat
+        

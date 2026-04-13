@@ -1,0 +1,27 @@
+        CHMOD(1)                  NetNIX Manual                  CHMOD(1)
+
+        NAME
+            chmod - change file permissions
+
+        SYNOPSIS
+            chmod <mode> <path>
+
+        DESCRIPTION
+            Change the permissions of a file or directory. Only the
+            file owner or root can change permissions.
+
+        MODES
+            String format:  rwxr-xr-x  (9 characters, owner/group/other)
+            Octal format:   755         (3 digits)
+
+            Permission bits:
+              r = read (4)    w = write (2)    x = execute (1)
+
+        EXAMPLES
+            chmod rwxr-xr-x /bin/myscript.cs
+            chmod 755 /bin/myscript.cs
+            chmod 644 notes.txt
+
+        SEE ALSO
+            chown, stat, man permissions
+        

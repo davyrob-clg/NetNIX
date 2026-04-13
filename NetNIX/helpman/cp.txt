@@ -1,0 +1,18 @@
+        CP(1)                     NetNIX Manual                     CP(1)
+
+        NAME
+            cp - copy files and directories
+
+        SYNOPSIS
+            cp [-r] <source> <dest>
+
+        OPTIONS
+            -r, -R      Copy directories recursively
+
+        EXAMPLES
+            cp file.txt backup.txt
+            cp -r /home/alice /home/alice.bak
+
+        SEE ALSO
+            mv, rm
+        

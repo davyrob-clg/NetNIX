@@ -1,0 +1,21 @@
+        GROUPMOD(8)               NetNIX Manual               GROUPMOD(8)
+
+        NAME
+            groupmod - modify a group
+
+        SYNOPSIS
+            groupmod [options] <groupname>
+
+        DESCRIPTION
+            Modify an existing group. Currently supports renaming.
+            Only root can run this command.
+
+        OPTIONS
+            -n, --new-name NAME     Rename the group
+
+        EXAMPLES
+            groupmod -n engineering developers
+
+        SEE ALSO
+            groupadd, groupdel, usermod, groups
+        

@@ -1,0 +1,109 @@
+        DAEMON(8)                 NetNIX Manual                 DAEMON(8)
+
+        NAME
+            daemon - manage background daemon processes
+
+        SYNOPSIS
+            daemon start <script.cs> [args...]
+            daemon stop <name|pid>
+            daemon list
+            daemon status <name|pid>
+
+        DESCRIPTION
+            Manages long-running background processes (daemons) within
+            the NetNIX environment. Daemons run on background threads
+            and continue even after the user logs out (until the NetNIX
+            process exits or the daemon is stopped).
+
+            Only root (uid 0) can start or stop daemons.
+
+        SUBCOMMANDS
+            start <script> [args]
+                Compile and start a daemon. The script must have a
+                static int Daemon(NixApi api, string[] args) method.
+                The script is searched in /sbin, /bin, /usr/local/bin,
+                and the current directory. You can use a bare name
+                (e.g. "httpd") or a path (e.g. "/sbin/httpd.cs").
+
+            stop <name|pid>
+                Stop a running daemon by name or PID. Triggers the
+                daemon's CancellationToken for graceful shutdown.
+                Waits up to 3 seconds for the daemon to exit.
+
+            list
+                List all known daemons (running and stopped) with
+                their PID, name, status, owner, and start time.
+
+            status <name|pid>
+                Show detailed information about a specific daemon.
+
+        DAEMON SCRIPTS
+            Daemon scripts are .cs files that define:
+
+                public static int Daemon(NixApi api, string[] args)
+
+            This method is called on a background thread. It should
+            run a loop and check for shutdown:
+
+                while (!api.DaemonToken.IsCancellationRequested)
+                {
+                    // do work
+                    try
+                    {
+                        Task.Delay(1000, api.DaemonToken)
+                            .GetAwaiter().GetResult();
+                    }
+                    catch (OperationCanceledException) { break; }
+                }
+
+            The optional Run() method is called when the script is
+            executed directly (not as a daemon), useful for help text.
+
+            See "man daemon-writing" for full templates and tutorial.
+
+        SANDBOX EXCEPTIONS
+            Daemons that need blocked APIs (e.g., System.Net for a
+            web server) require sandbox exceptions. Add entries to
+            /etc/sandbox.exceptions:
+
+                edit /etc/sandbox.exceptions
+
+            Format: <script-name> <namespace-or-token>
+
+            Example for httpd:
+                httpd  System.Net
+                httpd  HttpListener(
+
+            See "man sandbox.exceptions" for full documentation.
+
+            NOTE: Daemons that only use the NixApi surface (api.Net,
+            api.ReadText, etc.) do NOT need sandbox exceptions.
+
+        EXAMPLES
+            # Start the built-in HTTP server
+            edit /etc/sandbox.exceptions   (uncomment httpd lines)
+            daemon start httpd
+            daemon start httpd 9000        (custom port)
+
+            # Check what's running
+            daemon list
+            daemon status httpd
+
+            # Stop a daemon
+            daemon stop httpd
+            daemon stop 1000               (by PID)
+
+            # Start a custom daemon
+            daemon start /sbin/mydaemon.cs
+            daemon start mydaemon arg1 arg2
+
+        FILES
+            /sbin/httpd.cs              Built-in HTTP server daemon
+            /etc/sandbox.exceptions     Per-script sandbox overrides
+
+        SEE ALSO
+            man daemon-writing     How to write daemon scripts
+            man httpd              HTTP server daemon documentation
+            man sandbox.exceptions Per-script sandbox overrides
+            man sandbox            Main sandbox configuration
+            man api                NixApi scripting reference

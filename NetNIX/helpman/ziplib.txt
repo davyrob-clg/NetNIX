@@ -1,0 +1,55 @@
+        ZIPLIB(3)                 NetNIX Manual                 ZIPLIB(3)
+
+        NAME
+            ziplib - zip archive utility library for scripts
+
+        SYNOPSIS
+            #include <ziplib>
+
+        DESCRIPTION
+            A library providing helper methods for working with zip
+            archives in the VFS from scripts.
+
+        METHODS
+            ZipLib.ZipDirectory(api, dir, zipPath)
+                Create a zip from an entire directory.
+
+            ZipLib.ZipByExtension(api, dir, ext, zipPath)
+                Zip all files in dir matching extension (e.g. ".cs").
+
+            ZipLib.ExtractTo(api, zipPath, destDir)
+                Extract archive to directory. Returns file count.
+
+            ZipLib.ListEntries(api, zipPath)
+                Get filenames inside a zip (string[]).
+
+            ZipLib.TotalSize(api, zipPath)
+                Total uncompressed size of all entries.
+
+            ZipLib.CompressionRatio(api, zipPath)
+                Compression ratio (0.0 to 1.0).
+
+            ZipLib.Contains(api, zipPath, entryName)
+                Check if zip contains a specific file.
+
+            ZipLib.BackupDirectory(api, dir, backupDir)
+                Create timestamped backup zip. Returns zip path.
+
+        EXAMPLE
+            #include <ziplib>
+
+            public static class BackupCmd
+            {
+                public static int Run(NixApi api, string[] args)
+                {
+                    string zip = ZipLib.BackupDirectory(api,
+                        "/home/user", "/tmp/backups");
+                    if (zip != null)
+                        Console.WriteLine($"Backup: {zip}");
+                    return zip != null ? 0 : 1;
+                }
+            }
+
+        SEE ALSO
+            zip, unzip, man include, man api
+        

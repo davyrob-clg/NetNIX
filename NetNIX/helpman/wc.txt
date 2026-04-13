@@ -1,0 +1,21 @@
+        WC(1)                     NetNIX Manual                     WC(1)
+
+        NAME
+            wc - count lines, words, and bytes
+
+        SYNOPSIS
+            wc [-l] [-w] [-c] <file> [file2...]
+
+        OPTIONS
+            -l          Count lines only
+            -w          Count words only
+            -c          Count bytes only
+            (none)      Show all three counts
+
+        EXAMPLES
+            wc /bin/ls.cs
+            wc -l /etc/passwd
+
+        SEE ALSO
+            cat, grep
+        

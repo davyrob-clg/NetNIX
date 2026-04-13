@@ -382,94 +382,13 @@ public static class FirstRunSetup
 
     public static void InstallManPages(VirtualFileSystem fs)
     {
-        var pages = new Dictionary<string, string>
+        var pages = BuiltinManPages.LoadAll();
+
+        if (pages.Count == 0)
         {
-            // Shell builtins
-            ["man"]         = HelpPages.Man,
-            ["help"]        = HelpPages.Help,
-            ["cd"]          = HelpPages.Cd,
-            ["edit"]        = HelpPages.Edit,
-            ["write"]       = HelpPages.Write,
-            ["chmod"]       = HelpPages.Chmod,
-            ["chown"]       = HelpPages.Chown,
-            ["adduser"]     = HelpPages.Adduser,
-            ["deluser"]     = HelpPages.Deluser,
-            ["passwd"]      = HelpPages.Passwd,
-            ["su"]          = HelpPages.Su,
-            ["sudo"]        = HelpPages.Sudo,
-            ["stat"]        = HelpPages.Stat,
-            ["tree"]        = HelpPages.Tree,
-            ["run"]         = HelpPages.Run,
-            ["users"]       = HelpPages.Users,
-            ["groups"]      = HelpPages.Groups,
-            ["clear"]       = HelpPages.Clear,
-
-            // Script commands
-            ["ls"]          = HelpPages.Ls,
-            ["cat"]         = HelpPages.Cat,
-            ["cp"]          = HelpPages.Cp,
-            ["mv"]          = HelpPages.Mv,
-            ["rm"]          = HelpPages.Rm,
-            ["mkdir"]       = HelpPages.Mkdir,
-            ["rmdir"]       = HelpPages.Rmdir,
-            ["touch"]       = HelpPages.Touch,
-            ["head"]        = HelpPages.Head,
-            ["tail"]        = HelpPages.Tail,
-            ["wc"]          = HelpPages.Wc,
-            ["grep"]        = HelpPages.Grep,
-            ["find"]        = HelpPages.Find,
-            ["tee"]         = HelpPages.Tee,
-            ["echo"]        = HelpPages.Echo,
-            ["pwd"]         = HelpPages.Pwd,
-            ["whoami"]      = HelpPages.Whoami,
-            ["id"]          = HelpPages.Id,
-            ["uname"]       = HelpPages.Uname,
-            ["hostname"]    = HelpPages.Hostname,
-            ["date"]        = HelpPages.Date,
-            ["env"]         = HelpPages.Env,
-            ["basename"]    = HelpPages.Basename,
-            ["dirname"]     = HelpPages.Dirname,
-            ["du"]          = HelpPages.Du,
-            ["df"]          = HelpPages.Df,
-            ["yes"]         = HelpPages.Yes,
-            ["true"]        = HelpPages.TrueFalse,
-            ["false"]       = HelpPages.TrueFalse,
-            ["cbpaste"]     = HelpPages.Cbpaste,
-            ["cbcopy"]      = HelpPages.Cbcopy,
-            ["curl"]        = HelpPages.Curl,
-            ["wget"]        = HelpPages.Wget,
-            ["fetch"]       = HelpPages.Fetch,
-            ["netlib"]      = HelpPages.Netlib,
-            ["zip"]         = HelpPages.Zip,
-            ["unzip"]       = HelpPages.Unzip,
-            ["ziplib"]      = HelpPages.Ziplib,
-            ["useradd"]     = HelpPages.Useradd,
-            ["userdel"]     = HelpPages.Userdel,
-            ["usermod"]     = HelpPages.Usermod,
-            ["groupadd"]    = HelpPages.Groupadd,
-            ["groupdel"]    = HelpPages.Groupdel,
-            ["groupmod"]    = HelpPages.Groupmod,
-            ["export"]      = HelpPages.Export,
-            ["importfile"]  = HelpPages.ImportFile,
-            ["npak"]        = HelpPages.Npak,
-            ["mount"]       = HelpPages.Mount,
-            ["umount"]      = HelpPages.Umount,
-            ["source"]      = HelpPages.Source,
-            ["nshrc"]       = HelpPages.Nshrc,
-            ["include"]     = HelpPages.Include,
-            ["demoapilib"]  = HelpPages.Demoapilib,
-            ["demoapitest"] = HelpPages.Demoapitest,
-
-            // Topic pages
-            ["api"]         = HelpPages.ApiReference,
-            ["scripting"]   = HelpPages.ScriptingGuide,
-            ["editor"]      = HelpPages.EditorGuide,
-            ["filesystem"]  = HelpPages.FilesystemGuide,
-            ["permissions"] = HelpPages.PermissionsGuide,
-            ["sandbox"]     = HelpPages.Sandbox,
-            ["settingslib"] = HelpPages.Settingslib,
-            ["daemon"]      = HelpPages.Daemon,
-        };
+            Console.WriteLine("  Warning: No man pages found to install.");
+            return;
+        }
 
         foreach (var (name, content) in pages)
         {
@@ -480,6 +399,8 @@ public static class FirstRunSetup
             else
                 fs.CreateFile(path, 0, 0, data, "rw-r--r--");
         }
+
+        Console.WriteLine($"  Installed {pages.Count} man pages in /usr/share/man/");
     }
 
     private static string? ReadPassword()

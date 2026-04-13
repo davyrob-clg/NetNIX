@@ -1,0 +1,26 @@
+        UNZIP(1)                  NetNIX Manual                  UNZIP(1)
+
+        NAME
+            unzip - extract files from a zip archive
+
+        SYNOPSIS
+            unzip <archive.zip> [dest-dir]
+            unzip -l <archive.zip>
+
+        DESCRIPTION
+            Extract files from a zip archive into the virtual filesystem.
+            If no destination directory is given, files are extracted to
+            the current directory.
+
+        OPTIONS
+            unzip <archive> [dir]   Extract to directory (default: cwd)
+            unzip -l <archive>      List archive contents
+
+        EXAMPLES
+            unzip backup.zip
+            unzip backup.zip /tmp/extracted
+            unzip -l backup.zip
+
+        SEE ALSO
+            zip, man ziplib, man api
+        

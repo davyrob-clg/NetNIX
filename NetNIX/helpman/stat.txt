@@ -1,0 +1,19 @@
+        STAT(1)                   NetNIX Manual                   STAT(1)
+
+        NAME
+            stat - display file details
+
+        SYNOPSIS
+            stat <path>
+
+        DESCRIPTION
+            Show detailed information about a file or directory:
+            path, type, size, permissions, owner, and group.
+
+        EXAMPLES
+            stat /etc/motd
+            stat /bin/ls.cs
+
+        SEE ALSO
+            ls, chmod, chown
+        

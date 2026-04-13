@@ -1,0 +1,19 @@
+        HEAD(1)                   NetNIX Manual                   HEAD(1)
+
+        NAME
+            head - show first lines of a file
+
+        SYNOPSIS
+            head [-n N] <file> [file2...]
+
+        OPTIONS
+            -n N        Show first N lines (default 10)
+            -N          Short form (e.g. -5 for first 5 lines)
+
+        EXAMPLES
+            head /var/log/syslog
+            head -n 3 /etc/motd
+
+        SEE ALSO
+            tail, cat
+        

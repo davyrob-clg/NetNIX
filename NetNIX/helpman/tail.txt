@@ -1,0 +1,15 @@
+        TAIL(1)                   NetNIX Manual                   TAIL(1)
+
+        NAME
+            tail - show last lines of a file
+
+        SYNOPSIS
+            tail [-n N] <file> [file2...]
+
+        OPTIONS
+            -n N        Show last N lines (default 10)
+            -N          Short form (e.g. -20 for last 20 lines)
+
+        SEE ALSO
+            head, cat
+        

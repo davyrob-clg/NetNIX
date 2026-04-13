@@ -1,0 +1,19 @@
+        GROUPADD(8)               NetNIX Manual               GROUPADD(8)
+
+        NAME
+            groupadd - create a new group
+
+        SYNOPSIS
+            groupadd <groupname>
+
+        DESCRIPTION
+            Create a new group with an automatically assigned GID.
+            Only root can run this command.
+
+        EXAMPLES
+            groupadd developers
+            groupadd staff
+
+        SEE ALSO
+            groupdel, groupmod, usermod, groups
+        

@@ -1,0 +1,18 @@
+        PASSWD(1)                 NetNIX Manual                 PASSWD(1)
+
+        NAME
+            passwd - change user password
+
+        SYNOPSIS
+            passwd [username]
+
+        DESCRIPTION
+            Change the password for a user. Regular users can only
+            change their own password. Root can change any password.
+
+            passwd          Change own password
+            passwd alice    Change alice's password (root only)
+
+        SEE ALSO
+            su, adduser
+        

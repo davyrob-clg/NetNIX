@@ -1,0 +1,11 @@
+        CLEAR(1)                  NetNIX Manual                  CLEAR(1)
+
+        NAME
+            clear - clear the screen
+
+        SYNOPSIS
+            clear
+
+        SEE ALSO
+            help
+        

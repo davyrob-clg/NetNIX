@@ -1,0 +1,66 @@
+        SCRIPTING(7)              NetNIX Manual              SCRIPTING(7)
+
+        NAME
+            scripting - how to write NetNIX C# scripts
+
+        OVERVIEW
+            NetNIX scripts are plain-text .cs files compiled at runtime
+            using Roslyn. They are stored in the virtual filesystem and
+            can be edited with the 'edit' command.
+
+        SCRIPT CONTRACT
+            Every script must contain a class with this method:
+
+                public static int Run(NixApi api, string[] args)
+
+            - The class name does not matter.
+            - Return 0 for success, non-zero for failure.
+            - The NixApi object gives access to the filesystem, user
+              info, and other environment data.
+
+        CREATING A SCRIPT
+            1. Create the file:
+                   edit hello.cs
+
+            2. Press Ctrl+T ? 1 to insert a script template
+
+            3. Edit the code, F2 to save, Ctrl+Q to quit
+
+            4. Run it:
+                   hello               (from same directory)
+                   run hello.cs        (explicit)
+                   run /path/hello.cs  (absolute)
+
+        INSTALLING AS A COMMAND
+            Place the script in /bin/ to make it available everywhere:
+
+                cp hello.cs /bin/hello.cs
+
+            Now 'hello' works from any directory.
+
+        COMMAND RESOLUTION ORDER
+            1. Shell builtins (cd, edit, help, su, etc.)
+            2. .cs files in the current working directory
+            3. .cs files in /bin, /usr/bin, /usr/local/bin
+
+        AVAILABLE IMPORTS
+            Scripts can use any .NET 8 BCL type, plus:
+                using NetNIX.Scripting;    (for NixApi)
+
+        COMPILATION ERRORS
+            If your script has errors, they are printed to the console
+            with line numbers. Fix them with 'edit' and try again.
+
+        CACHING
+            Compiled scripts are cached in memory by source hash.
+            Editing the file invalidates the cache automatically.
+
+        ADDING HELP FOR YOUR SCRIPT
+            Create a man page at:
+                edit /usr/share/man/mycommand.txt
+
+            Then users can type: man mycommand
+
+        SEE ALSO
+            man api, edit, run
+        

@@ -1,0 +1,19 @@
+        SU(1)                     NetNIX Manual                     SU(1)
+
+        NAME
+            su - switch user
+
+        SYNOPSIS
+            su <username>
+
+        DESCRIPTION
+            Switch to another user account. Requires the target user's
+            password unless you are root.
+
+        EXAMPLES
+            su root
+            su alice
+
+        SEE ALSO
+            whoami, id, passwd, sudo
+        

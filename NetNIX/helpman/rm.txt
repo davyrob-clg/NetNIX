@@ -1,0 +1,20 @@
+        RM(1)                     NetNIX Manual                     RM(1)
+
+        NAME
+            rm - remove files and directories
+
+        SYNOPSIS
+            rm [-r] [-f] <path> [path2...]
+
+        OPTIONS
+            -r          Remove directories recursively
+            -f          Force (no error if file missing)
+            -rf / -fr   Both
+
+        EXAMPLES
+            rm file.txt
+            rm -rf /tmp/old
+
+        SEE ALSO
+            rmdir, cp, mv
+        

@@ -1,0 +1,13 @@
+        TRUE(1) / FALSE(1)        NetNIX Manual         TRUE(1) / FALSE(1)
+
+        NAME
+            true - return success (exit code 0)
+            false - return failure (exit code 1)
+
+        SYNOPSIS
+            true
+            false
+
+        SEE ALSO
+            echo, yes
+        

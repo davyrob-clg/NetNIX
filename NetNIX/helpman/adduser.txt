@@ -1,0 +1,20 @@
+        ADDUSER(1)                NetNIX Manual                ADDUSER(1)
+
+        NAME
+            adduser - create a new user account
+
+        SYNOPSIS
+            adduser <username>
+
+        DESCRIPTION
+            Create a new user account with a home directory. Prompts
+            for a password. Only root can create users.
+
+            The new user gets:
+              - A unique UID
+              - A personal group with matching GID
+              - A home directory at /home/<username>
+
+        SEE ALSO
+            deluser, passwd, users, su
+        

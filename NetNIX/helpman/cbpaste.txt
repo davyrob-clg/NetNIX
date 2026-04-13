@@ -1,0 +1,39 @@
+        CBPASTE(1)                NetNIX Manual                CBPASTE(1)
+
+        NAME
+            cbpaste - paste host clipboard into the NetNIX environment
+
+        SYNOPSIS
+            cbpaste [file]
+            cbpaste -a <file>
+            cbpaste -p
+
+        DESCRIPTION
+            Reads the host system's clipboard and either prints it to
+            stdout or writes it to a file in the virtual filesystem.
+
+            This bridges the host OS clipboard with the NetNIX VFS,
+            allowing you to paste code, text, or data from your host
+            into the environment.
+
+        OPTIONS
+            cbpaste             Print clipboard to stdout
+            cbpaste <file>      Write clipboard to file (creates/overwrites)
+            cbpaste -a <file>   Append clipboard to file
+            cbpaste -p          Print clipboard to stdout (explicit)
+
+        EXAMPLES
+            cbpaste                     Print clipboard contents
+            cbpaste notes.txt           Save clipboard to notes.txt
+            cbpaste -a log.txt          Append clipboard to log.txt
+            cbpaste mycode.cs           Paste code from host into a script
+            cbpaste /bin/newcmd.cs      Install a command from clipboard
+
+        PLATFORM SUPPORT
+            Windows     Uses powershell Get-Clipboard
+            macOS       Uses pbpaste
+            Linux       Uses xclip or xsel
+
+        SEE ALSO
+            cbcopy, echo, write, edit, man api
+        

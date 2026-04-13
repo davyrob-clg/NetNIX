@@ -1,0 +1,36 @@
+        USERMOD(8)                NetNIX Manual                USERMOD(8)
+
+        NAME
+            usermod - modify a user account
+
+        SYNOPSIS
+            usermod [options] <username>
+
+        DESCRIPTION
+            Modify an existing user account. Change home directory,
+            shell, group membership, or lock/unlock the account.
+            Only root can run this command.
+
+        OPTIONS
+            -d, --home DIR               Change home directory
+            -s, --shell SHELL            Change login shell
+            -L, --lock                   Lock account (disable login)
+            -U, --unlock                 Unlock account (enable login)
+            -aG, --append-group G1,G2    Add to supplementary groups
+            -rG, --remove-group G1,G2    Remove from supplementary groups
+
+        EXAMPLES
+            usermod -d /home/newhome alice
+            usermod -s /bin/nsh bob
+            usermod -L carol
+            usermod -U carol
+            usermod -aG developers,staff alice
+            usermod -rG staff bob
+
+        NOTES
+            Locking prepends '!' to the password hash, preventing
+            authentication. Unlocking removes the '!' prefix.
+
+        SEE ALSO
+            useradd, userdel, groupmod, passwd
+        

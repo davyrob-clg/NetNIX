@@ -1,0 +1,34 @@
+        USERADD(8)                NetNIX Manual                USERADD(8)
+
+        NAME
+            useradd - create a new user account
+
+        SYNOPSIS
+            useradd [options] <username>
+
+        DESCRIPTION
+            Create a new user account with a home directory, personal
+            group, and default shell. Only root can run this command.
+
+        OPTIONS
+            -m, --create-home       Create home directory (default)
+            -d, --home DIR          Set custom home directory path
+            -s, --shell SHELL       Set login shell (default: /bin/nsh)
+            -p, --password PASS     Set password (default: username)
+            -G, --groups G1,G2      Add to supplementary groups
+
+        EXAMPLES
+            useradd alice
+            useradd -p secret bob
+            useradd -d /home/carol -s /bin/nsh carol
+            useradd -G developers,staff dave
+
+        NOTES
+            Each new user automatically gets:
+              - A unique UID
+              - A personal primary group with matching GID
+              - Files from /etc/skel copied to home directory
+
+        SEE ALSO
+            userdel, usermod, groupadd, adduser, passwd
+        

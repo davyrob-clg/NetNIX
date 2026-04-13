@@ -1,0 +1,48 @@
+        FILESYSTEM(7)             NetNIX Manual             FILESYSTEM(7)
+
+        NAME
+            filesystem - NetNIX filesystem hierarchy
+
+        DESCRIPTION
+            NetNIX follows the Filesystem Hierarchy Standard (FHS).
+            The entire filesystem is stored in a single .zip archive.
+
+        DIRECTORY STRUCTURE
+            /               Root directory
+            /bin            Essential command scripts (.cs files)
+            /boot           Boot files (reserved)
+            /dev            Device files (reserved)
+            /etc            System configuration
+            /etc/passwd     User account database
+            /etc/shadow     Password hashes
+            /etc/group      Group database
+            /etc/motd       Message of the day
+            /etc/skel       Skeleton for new home directories
+            /home           User home directories
+            /home/<user>    Individual user home
+            /lib            Shared libraries (reserved)
+            /media          Removable media mount points
+            /mnt            Temporary mount points
+            /opt            Optional software
+            /proc           Process info (reserved, read-only)
+            /root           Root user's home directory
+            /run            Runtime data
+            /sbin           System administration commands
+            /srv            Service data
+            /sys            System info (reserved, read-only)
+            /tmp            Temporary files (world-writable)
+            /usr            User programs and data
+            /usr/bin        Additional commands
+            /usr/local/bin  Locally installed commands
+            /usr/share/man  Manual pages (help system)
+            /var            Variable data
+            /var/log        Log files
+            /var/tmp        Persistent temporary files
+
+        FILE STORAGE
+            The filesystem is persisted at:
+                %APPDATA%/NetNIX/rootfs.zip
+
+        SEE ALSO
+            man permissions, ls, tree, df
+        

@@ -1,0 +1,15 @@
+        BASENAME(1)               NetNIX Manual               BASENAME(1)
+
+        NAME
+            basename - strip directory from path
+
+        SYNOPSIS
+            basename <path> [suffix]
+
+        EXAMPLES
+            basename /bin/ls.cs          ? ls.cs
+            basename /bin/ls.cs .cs      ? ls
+
+        SEE ALSO
+            dirname
+        

@@ -1,0 +1,107 @@
+        SANDBOX.EXCEPTIONS(5)    NetNIX Manual        SANDBOX.EXCEPTIONS(5)
+
+        NAME
+            sandbox.exceptions - per-script sandbox override rules
+
+        LOCATION
+            /etc/sandbox.exceptions
+
+        DESCRIPTION
+            Grants individual scripts permission to use specific
+            namespaces or API patterns that are normally blocked by
+            /etc/sandbox.conf.
+
+            This is the controlled way to allow trusted scripts
+            (especially daemons) to access restricted .NET APIs
+            without weakening the sandbox for all scripts.
+
+            The file is root-editable (permissions rw-r-----).
+            Changes take effect on the next script or daemon start.
+
+        FORMAT
+            Lines starting with # are comments. Blank lines are ignored.
+            Each non-comment line grants ONE exception to ONE script:
+
+                <script-name>  <namespace-or-token>
+
+            script-name     A bare name (e.g. "httpd"), a full VFS path
+                            (e.g. "/sbin/httpd.cs"), or "*" for all
+                            scripts (use with extreme caution).
+
+            namespace-or-token
+                            A blocked_usings namespace prefix or a
+                            blocked_tokens pattern from sandbox.conf.
+
+        MATCHING RULES
+            The script name is matched in several ways:
+
+            1. Exact match on the daemon/script name:
+                   httpd  System.Net
+
+            2. Exact match on the full VFS path:
+                   /sbin/httpd.cs  System.Net
+
+            3. Suffix match (name.cs at end of path):
+                   httpd  System.Net
+                   (matches /sbin/httpd.cs)
+
+            4. Wildcard — applies to ALL scripts:
+                   *  System.Net
+                   WARNING: This defeats the sandbox for that rule!
+
+        ADDITIONAL ASSEMBLIES
+            When a namespace exception is granted, the daemon/script
+            compiler automatically adds the required .NET assemblies.
+
+            Supported namespace exceptions and their assemblies:
+
+            System.Net          System.Net.Primitives
+                                System.Net.HttpListener
+                                System.Net.Sockets
+                                System.Net.Http
+                                System.Private.Uri
+
+            System.Net.Http     System.Net.Http
+                                System.Net.Primitives
+
+            System.Net.Sockets  System.Net.Sockets
+                                System.Net.Primitives
+
+            System.IO           System.IO.FileSystem
+                                System.IO.FileSystem.Primitives
+
+            System.Diagnostics  System.Diagnostics.Process
+
+        EXAMPLES
+            # Allow httpd to use networking
+            httpd  System.Net
+            httpd  HttpListener(
+
+            # Allow a custom daemon to use sockets
+            mysocketd  System.Net
+            mysocketd  Socket(
+            mysocketd  TcpClient(
+
+            # Allow a specific path
+            /usr/local/bin/mytool.cs  System.IO
+
+            # DANGEROUS: allow all scripts to use networking
+            # *  System.Net
+
+        SECURITY NOTES
+            - Only grant exceptions to scripts you trust.
+            - Prefer naming specific scripts over using "*".
+            - Each line is ONE exception. A script needing System.Net
+              AND HttpListener( needs TWO lines.
+            - The sandbox.conf rules still apply to all other scripts.
+            - Only root can edit this file.
+            - Exceptions only take effect for daemons (started via
+              the daemon command). Regular scripts run through the
+              shell use the standard sandbox without exceptions.
+
+        FILES
+            /etc/sandbox.exceptions  This file
+            /etc/sandbox.conf        Main sandbox rules
+
+        SEE ALSO
+            man sandbox, man daemon, man daemon-writing

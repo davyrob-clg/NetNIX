@@ -1,0 +1,21 @@
+        FETCH(1)                  NetNIX Manual                  FETCH(1)
+
+        NAME
+            fetch - quick HTTP GET and print response
+
+        SYNOPSIS
+            fetch <url>
+
+        DESCRIPTION
+            Perform a simple HTTP GET request and print the response
+            body to stdout. This is the simplest way to retrieve
+            web content from a script or the shell.
+
+        EXAMPLES
+            fetch https://httpbin.org/get
+            fetch https://api.github.com
+            fetch https://example.com > page.html
+
+        SEE ALSO
+            curl, wget, man api
+        

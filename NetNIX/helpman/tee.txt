@@ -1,0 +1,18 @@
+        TEE(1)                    NetNIX Manual                    TEE(1)
+
+        NAME
+            tee - write input to file and stdout
+
+        SYNOPSIS
+            tee [-a] <file>
+
+        OPTIONS
+            -a          Append instead of overwrite
+
+        DESCRIPTION
+            Read text interactively and write it both to the screen
+            and to a file. Enter '.' on a line to finish.
+
+        SEE ALSO
+            echo, write
+        

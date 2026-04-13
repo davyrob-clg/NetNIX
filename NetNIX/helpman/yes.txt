@@ -1,0 +1,19 @@
+        YES(1)                    NetNIX Manual                    YES(1)
+
+        NAME
+            yes - output a string repeatedly
+
+        SYNOPSIS
+            yes [text]
+
+        DESCRIPTION
+            Print "y" (or specified text) 100 times. Useful for
+            testing output redirection.
+
+        EXAMPLES
+            yes
+            yes hello > /dev/null
+
+        SEE ALSO
+            echo
+        

@@ -1,0 +1,42 @@
+        SUDO(8)                   NetNIX Manual                   SUDO(8)
+
+        NAME
+            sudo - execute a command as root
+
+        SYNOPSIS
+            sudo <command> [args...]
+
+        DESCRIPTION
+            Executes the given command with root (uid 0) privileges.
+            The calling user must be a member of the 'sudo' group.
+
+            When invoked, sudo prompts for the calling user's own
+            password (not the root password) to verify identity.
+
+            Root users do not need sudo � the command is executed
+            directly without a password prompt.
+
+        SETUP
+            To grant a user sudo access:
+
+                su root
+                usermod -G sudo <username>
+
+            Or during first-run setup, choose 'y' when asked to add
+            the user to the sudo group.
+
+        EXAMPLES
+            sudo mount extra.zip /mnt/extra
+            sudo useradd newuser password123
+            sudo chmod 755 /bin/myscript.cs
+            sudo rm /etc/somefile
+
+        NOTES
+            Only members of the 'sudo' group can use this command.
+            The user authenticates with their own password.
+            The command runs with uid=0, gid=0 (root).
+            After the command finishes, privileges return to normal.
+
+        SEE ALSO
+            su, passwd, usermod, groups
+        

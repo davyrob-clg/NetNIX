@@ -1,0 +1,15 @@
+        USERS(1)                  NetNIX Manual                  USERS(1)
+
+        NAME
+            users - list all user accounts
+
+        SYNOPSIS
+            users
+
+        DESCRIPTION
+            Display all user accounts with their UID, GID, group name,
+            and home directory.
+
+        SEE ALSO
+            groups, id, adduser
+        
