@@ -11,7 +11,7 @@
 
 ---
 
-NetNIX simulates a complete UNIX experience inside your terminal — with a virtual filesystem, user accounts, a shell, file permissions, a text editor, networking, background daemons, a package manager, and a C# scripting engine that lets you write and run scripts directly inside the environment.
+NetNIX simulates a complete UNIX experience inside your terminal â€” with a virtual filesystem, user accounts, a shell, file permissions, a text editor, networking, background daemons, a package manager, and a C# scripting engine that lets you write and run scripts directly inside the environment.
 
 Everything lives in a single portable zip archive on your host OS. No admin rights, no VMs, no containers.
 
@@ -24,12 +24,12 @@ Everything lives in a single portable zip archive on your host OS. No admin righ
 
 <p align="center">
   <img src="Screenshots/Basic%20Unix%201.png" alt="Basic Unix Commands" width="100%"/><br/>
-  <em>Basic UNIX commands — navigating the virtual filesystem</em>
+  <em>Basic UNIX commands â€” navigating the virtual filesystem</em>
 </p>
 
 <p align="center">
   <img src="Screenshots/Basic%20Unix%202.png" alt="File Operations" width="100%"/><br/>
-  <em>File operations — creating, reading, and managing files</em>
+  <em>File operations â€” creating, reading, and managing files</em>
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@ Everything lives in a single portable zip archive on your host OS. No admin righ
 
 <p align="center">
   <img src="Screenshots/New%20User%20SUDO%20screenshot.png" alt="User Management & Sudo" width="100%"/><br/>
-  <em>Multi-user support — creating users and using <code>sudo</code></em>
+  <em>Multi-user support â€” creating users and using <code>sudo</code></em>
 </p>
 
 <p align="center">
@@ -54,7 +54,7 @@ Everything lives in a single portable zip archive on your host OS. No admin righ
 
 <p align="center">
   <img src="Screenshots/Man%20help%20pages%201.png" alt="Man Pages 1" width="100%"/><br/>
-  <em>Comprehensive manual pages — 83 built-in topics</em>
+  <em>Comprehensive manual pages â€” 83 built-in topics</em>
 </p>
 
 <p align="center">
@@ -74,27 +74,27 @@ Everything lives in a single portable zip archive on your host OS. No admin righ
 
 <p align="center">
   <img src="Screenshots/Mount%20umount%20unmount%20Screenshot.png" alt="Mount and Umount" width="100%"/><br/>
-  <em>Full mount/unmount lifecycle — read-only and read-write support</em>
+  <em>Full mount/unmount lifecycle â€” read-only and read-write support</em>
 </p>
 
 <p align="center">
   <img src="Screenshots/NPAK%201.png" alt="Package Manager 1" width="100%"/><br/>
-  <em>Package manager (<code>npak</code>) — building and installing packages</em>
+  <em>Package manager (<code>npak</code>) â€” building and installing packages</em>
 </p>
 
 <p align="center">
   <img src="Screenshots/NPAK%202.png" alt="Package Manager 2" width="100%"/><br/>
-  <em>Package manager — listing, inspecting, and removing packages</em>
+  <em>Package manager â€” listing, inspecting, and removing packages</em>
 </p>
 
 <p align="center">
   <img src="Screenshots/Sandbox%20Screenshot%201%20Configuration.png" alt="Sandbox Configuration" width="100%"/><br/>
-  <em>Sandbox security — <code>/etc/sandbox.conf</code> controls blocked APIs</em>
+  <em>Sandbox security â€” <code>/etc/sandbox.conf</code> controls blocked APIs</em>
 </p>
 
 <p align="center">
   <img src="Screenshots/Sandbox%20Screenshot%202%20Exceptions.png" alt="Sandbox Exceptions" width="100%"/><br/>
-  <em>Per-script sandbox exceptions — granting trusted daemons access to blocked APIs</em>
+  <em>Per-script sandbox exceptions â€” granting trusted daemons access to blocked APIs</em>
 </p>
 
 ---
@@ -117,7 +117,7 @@ root# daemon stop httpd
 daemon: 'httpd' stopped
 ```
 
-Write your own daemons — run `man daemon-writing` inside NetNIX for a complete guide with three copy-paste templates (minimal daemon, HTTP server, file watcher).
+Write your own daemons â€” run `man daemon-writing` inside NetNIX for a complete guide with three copy-paste templates (minimal daemon, HTTP server, file watcher).
 
 ### Built-in HTTP Server (httpd)
 A working HTTP file server daemon that serves the virtual filesystem over localhost. Supports directory listings, content-type detection, custom ports, and custom web roots.
@@ -129,10 +129,10 @@ root# daemon start httpd 8080
 ```
 
 ### Sandbox with Controlled Exceptions
-The security sandbox blocks scripts from accessing `System.IO`, `System.Net`, `System.Diagnostics`, `System.Reflection`, and other dangerous APIs. Root can now grant individual scripts controlled exceptions via `/etc/sandbox.exceptions` — without weakening the sandbox for everything else:
+The security sandbox blocks scripts from accessing `System.IO`, `System.Net`, `System.Diagnostics`, `System.Reflection`, and other dangerous APIs. Root can now grant individual scripts controlled exceptions via `/etc/sandbox.exceptions` â€” without weakening the sandbox for everything else:
 
 ```
-# /etc/sandbox.exceptions — root only
+# /etc/sandbox.exceptions â€” root only
 httpd  System.Net
 httpd  HttpListener(
 ```
@@ -225,7 +225,7 @@ root# reinstall
 - Directory traverse (execute) permission checking along the full path
 - `chmod` with symbolic (`rwxr-xr-x`) or octal (`755`) notation
 - `chown` for changing file ownership (root only)
-- Home directories default to `rwx------` (700) — private to each user
+- Home directories default to `rwx------` (700) â€” private to each user
 - Root bypasses all permission checks
 
 ### Interactive Shell (nsh)
@@ -260,7 +260,7 @@ root# reinstall
 ### Settings Library (settingslib)
 - Per-user settings in `~/.config/<app>.conf`
 - System-wide settings in `/etc/opt/<app>.conf` (root-only writes)
-- `GetEffective()` — per-user overrides system-wide with fallback
+- `GetEffective()` â€” per-user overrides system-wide with fallback
 - Interactive demo: `settings-demo`
 
 ### Built-in Shell Commands
@@ -300,7 +300,7 @@ All of these are plain C# source files compiled and executed at runtime:
 | **Misc** | `yes`, `true`, `false` |
 | **Demos** | `demo`, `demoapitest`, `settings-demo` |
 
-### System Admin Commands (`/sbin/*.cs` — root/sudo only)
+### System Admin Commands (`/sbin/*.cs` â€” root/sudo only)
 | Category | Commands |
 |----------|----------|
 | **Users & Groups** | `useradd`, `userdel`, `usermod`, `groupadd`, `groupdel`, `groupmod` |
@@ -551,7 +551,7 @@ File metadata (owners, groups, permissions) is stored in a `.vfsmeta` entry insi
 ## Project Structure
 ```
 NetNIX/
-??? Program.cs                  # Entry point — boot, login loop, reset
+??? Program.cs                  # Entry point â€” boot, login loop, reset
 ??? Shell/
 ?   ??? NixShell.cs             # Interactive shell (nsh) + daemon management
 ?   ??? TextEditor.cs           # Full-screen text editor
@@ -591,3 +591,6 @@ NetNIX/
 
 ## License
 See [LICENSE](LICENSE) for details.
+
+## AI
+Artificial intelligence was used largely in the implementation of this project 
