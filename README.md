@@ -18,82 +18,82 @@ Everything lives in a single portable zip archive on your host OS. No admin righ
 ## Screenshots
 
 <p align="center">
-  <img src="Screenshots/login.png" alt="Login Screen" width="700"/><br/>
+  <img src="Screenshots/login.png" alt="Login Screen" width="100%"/><br/>
   <em>Login prompt and boot sequence</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Basic%20Unix%201.png" alt="Basic Unix Commands" width="700"/><br/>
+  <img src="Screenshots/Basic%20Unix%201.png" alt="Basic Unix Commands" width="100%"/><br/>
   <em>Basic UNIX commands — navigating the virtual filesystem</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Basic%20Unix%202.png" alt="File Operations" width="700"/><br/>
+  <img src="Screenshots/Basic%20Unix%202.png" alt="File Operations" width="100%"/><br/>
   <em>File operations — creating, reading, and managing files</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Basic%20Unix%203.png" alt="Advanced Operations" width="700"/><br/>
+  <img src="Screenshots/Basic%20Unix%203.png" alt="Advanced Operations" width="100%"/><br/>
   <em>Advanced filesystem operations</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/command%20screenshot.png" alt="Command Overview" width="700"/><br/>
+  <img src="Screenshots/command%20screenshot.png" alt="Command Overview" width="100%"/><br/>
   <em>Available commands and help system</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/New%20User%20SUDO%20screenshot.png" alt="User Management & Sudo" width="700"/><br/>
+  <img src="Screenshots/New%20User%20SUDO%20screenshot.png" alt="User Management & Sudo" width="100%"/><br/>
   <em>Multi-user support — creating users and using <code>sudo</code></em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/NSHRC%20User%20Startuo.png" alt="Shell Startup Scripts" width="700"/><br/>
+  <img src="Screenshots/NSHRC%20User%20Startuo.png" alt="Shell Startup Scripts" width="100%"/><br/>
   <em>Per-user shell startup scripts (<code>~/.nshrc</code>)</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Man%20help%20pages%201.png" alt="Man Pages 1" width="700"/><br/>
+  <img src="Screenshots/Man%20help%20pages%201.png" alt="Man Pages 1" width="100%"/><br/>
   <em>Comprehensive manual pages — 83 built-in topics</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Man%20help%20pages%202.png" alt="Man Pages 2" width="700"/><br/>
+  <img src="Screenshots/Man%20help%20pages%202.png" alt="Man Pages 2" width="100%"/><br/>
   <em>Detailed command documentation with examples</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Man%20help%20pages%203%20zip%20.pngz.png" alt="Man Pages Zip" width="700"/><br/>
+  <img src="Screenshots/Man%20help%20pages%203%20zip%20.pngz.png" alt="Man Pages Zip" width="100%"/><br/>
   <em>Library and archive documentation</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Mount%20Screenshot.png" alt="Mount" width="700"/><br/>
+  <img src="Screenshots/Mount%20Screenshot.png" alt="Mount" width="100%"/><br/>
   <em>Mounting host zip archives into the VFS with <code>mount</code></em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Mount%20umount%20unmount%20Screenshot.png" alt="Mount and Umount" width="700"/><br/>
+  <img src="Screenshots/Mount%20umount%20unmount%20Screenshot.png" alt="Mount and Umount" width="100%"/><br/>
   <em>Full mount/unmount lifecycle — read-only and read-write support</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/NPAK%201.png" alt="Package Manager 1" width="700"/><br/>
+  <img src="Screenshots/NPAK%201.png" alt="Package Manager 1" width="100%"/><br/>
   <em>Package manager (<code>npak</code>) — building and installing packages</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/NPAK%202.png" alt="Package Manager 2" width="700"/><br/>
+  <img src="Screenshots/NPAK%202.png" alt="Package Manager 2" width="100%"/><br/>
   <em>Package manager — listing, inspecting, and removing packages</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Sandbox%20Screenshot%201%20Configuration.png" alt="Sandbox Configuration" width="700"/><br/>
+  <img src="Screenshots/Sandbox%20Screenshot%201%20Configuration.png" alt="Sandbox Configuration" width="100%"/><br/>
   <em>Sandbox security — <code>/etc/sandbox.conf</code> controls blocked APIs</em>
 </p>
 
 <p align="center">
-  <img src="Screenshots/Sandbox%20Screenshot%202%20Exceptions.png" alt="Sandbox Exceptions" width="700"/><br/>
+  <img src="Screenshots/Sandbox%20Screenshot%202%20Exceptions.png" alt="Sandbox Exceptions" width="100%"/><br/>
   <em>Per-script sandbox exceptions — granting trusted daemons access to blocked APIs</em>
 </p>
 
