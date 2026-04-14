@@ -99,7 +99,11 @@ public static class FirstRunSetup
         Console.WriteLine("[*] Installing manual pages...");
         InstallManPages(fs);
 
-        // 9. Save everything
+        // 9. Install factory files
+        Console.WriteLine("[*] Installing factory files...");
+        InstallFactoryFiles(fs);
+
+        // 10. Save everything
         fs.Save();
         Console.WriteLine();
         Console.WriteLine("[*] Setup complete! Filesystem saved to: " + archivePath);
@@ -401,6 +405,52 @@ public static class FirstRunSetup
         }
 
         Console.WriteLine($"  Installed {pages.Count} man pages in /usr/share/man/");
+    }
+
+    public static void InstallFactoryFiles(VirtualFileSystem fs)
+    {
+        // Ensure all required directories exist first
+        var dirs = FactoryFiles.GetDirectories();
+        foreach (var dir in dirs)
+        {
+            if (!fs.Exists(dir))
+                fs.CreateDirectory(dir, 0, 0, "rwxr-xr-x");
+        }
+
+        var files = FactoryFiles.LoadAll();
+
+        if (files.Count == 0)
+        {
+            Console.WriteLine("  No factory files found.");
+            return;
+        }
+
+        foreach (var (path, data) in files)
+        {
+            // Ensure parent directories exist (in case they aren't
+            // covered by GetDirectories, e.g. deeply nested paths)
+            EnsureParentDirs(fs, path);
+
+            if (fs.IsFile(path))
+                fs.WriteFile(path, data);
+            else
+                fs.CreateFile(path, 0, 0, data, "rw-r--r--");
+        }
+
+        Console.WriteLine($"  Installed {files.Count} factory file(s)");
+    }
+
+    private static void EnsureParentDirs(VirtualFileSystem fs, string path)
+    {
+        // Walk up from the file path and create any missing directories
+        var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        string current = "";
+        for (int i = 0; i < parts.Length - 1; i++) // skip the filename
+        {
+            current += "/" + parts[i];
+            if (!fs.Exists(current))
+                fs.CreateDirectory(current, 0, 0, "rwxr-xr-x");
+        }
     }
 
     private static string? ReadPassword()

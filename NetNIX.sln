@@ -35,10 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "factoryfiles", "factoryfiles", "{19332185-0858-4B1F-BFD7-EC85E7C2FC59}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{DA59BFA4-7E17-4C2C-8D44-2B996EE8A812}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helpman", "helpman", "{7364B9E7-A24B-44A0-84E7-B46B9333C21A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Screenshots", "Screenshots", "{717BDD3F-0E6A-4764-BA25-8CDB666CCA8D}"
@@ -76,7 +72,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{DA59BFA4-7E17-4C2C-8D44-2B996EE8A812} = {19332185-0858-4B1F-BFD7-EC85E7C2FC59}
 		{717BDD3F-0E6A-4764-BA25-8CDB666CCA8D} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

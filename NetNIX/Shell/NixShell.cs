@@ -206,7 +206,7 @@ public sealed class NixShell
             whoami  id  uname  hostname  date  env
             basename  dirname  du  df  yes  true  false
             curl  wget  fetch  cbpaste  cbcopy  zip  unzip
-            settings-demo
+            kobold  settings-demo
 
           System admin commands (/sbin/*.cs — root/sudo):
             useradd  userdel  usermod
@@ -228,6 +228,8 @@ public sealed class NixShell
             man daemon               Daemon management commands
             man daemon-writing       How to write daemon scripts
             man httpd                Built-in HTTP server daemon
+            man kobold               AI chat client for KoboldCpp
+            man koboldlib            KoboldCpp client library
 
           Shell scripts:
             source <file>       Execute a shell script (one command per line)

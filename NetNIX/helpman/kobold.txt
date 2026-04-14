@@ -1,0 +1,170 @@
+        KOBOLD(1)                 NetNIX Manual                 KOBOLD(1)
+
+        NAME
+            kobold - interactive AI chat client for KoboldCpp
+
+        SYNOPSIS
+            kobold
+            kobold -m "message"
+            kobold --raw "prompt"
+            kobold --status
+            kobold --config
+            kobold --set <key> <value>
+            kobold --reset
+            kobold --help
+
+        DESCRIPTION
+            Connects to a KoboldCpp (or compatible) text-generation
+            API and provides an interactive chat session in the
+            terminal with conversation memory.
+
+            By default, connects to http://localhost:5001. Change the
+            endpoint with:
+
+                kobold --set endpoint http://HOST:PORT
+
+        SUBCOMMANDS
+            kobold
+                Start an interactive chat session. Type messages and
+                receive AI responses. Use /quit to exit.
+
+            kobold -m "message"
+                Send a single message and print the AI's reply.
+                Uses the system prompt and chat formatting.
+                Useful for scripting or quick questions.
+
+            kobold --raw "prompt"
+                Send a raw prompt directly to the API with no system
+                prompt and no chat formatting. Returns the model's
+                raw text completion. Useful for creative writing,
+                code generation, or custom prompt formats.
+
+            kobold --status
+                Check if the KoboldCpp API is reachable and display
+                the loaded model name and context size.
+
+            kobold --config
+                Display all current settings with their values and
+                where each value comes from (user, system, or default).
+                Shows file paths for both per-user and system configs.
+
+            kobold --set <key> <value>
+                Persistently change a setting (stored per-user in
+                ~/.config/kobold.conf via settingslib).
+
+            kobold --reset
+                Reset all settings to factory defaults. Removes
+                per-user settings and recreates them from defaults.
+
+        INTERACTIVE COMMANDS
+            During an interactive chat session:
+
+            /quit, /exit     End the chat
+            /clear           Clear conversation history
+            /model           Show the current model name
+            /config          Show settings
+            /set key value   Change a setting (session only)
+            /save [path]     Save conversation to a VFS file
+            /help            Show available commands
+
+        SETTINGS
+            All settings are persisted per-user via settingslib.
+
+            Key             Default                  Description
+            endpoint        http://localhost:5001    API base URL
+            max_context     4096                     Max context tokens
+            max_length      256                      Max generated tokens
+            temperature     0.7                      Sampling temperature
+            top_p           0.9                      Nucleus sampling
+            top_k           40                       Top-k sampling
+            rep_penalty     1.1                      Repetition penalty
+            timeout         120                      Request timeout (sec)
+            system_prompt   (built-in)               System prompt for AI
+
+        FIRST USE
+            On first use (when no settings files exist), KoboldApi
+            automatically creates default configuration files:
+
+                ~/.config/kobold.conf      Per-user settings
+                /etc/opt/kobold.conf       System-wide settings (if root)
+
+            Both files are populated with all default values so you
+            can edit them directly or use 'kobold --set'.
+
+            Use 'kobold --config' to see where each active setting
+            comes from (user, system, or default).
+
+            Use 'kobold --reset' to restore all settings to defaults.
+
+        SETUP
+            1. Install and run KoboldCpp on your machine or network:
+               https://github.com/LostRuins/koboldcpp
+
+            2. Note the API URL (e.g., http://localhost:5001)
+
+            3. Set the endpoint if it's not the default:
+               kobold --set endpoint http://192.168.1.50:5001
+
+            4. Test the connection:
+               kobold --status
+
+            5. Start chatting:
+               kobold
+
+        EXAMPLES
+            # Check connection
+            kobold --status
+
+            # Configure endpoint
+            kobold --set endpoint http://192.168.1.10:5001
+
+            # Increase creativity
+            kobold --set temperature 1.0
+            kobold --set max_length 512
+
+            # Quick question (with system prompt and chat formatting)
+            kobold -m "Explain quantum computing in one sentence."
+
+            # Raw completion (no system prompt, no chat markers)
+            kobold --raw "Once upon a time in a land far away,"
+
+            # View all settings and where they come from
+            kobold --config
+
+            # Reset everything to defaults
+            kobold --reset
+
+            # Interactive chat
+            kobold
+            You> What is the capital of France?
+            AI> The capital of France is Paris.
+            You> Tell me more about it.
+            AI> Paris is the largest city in France...
+            You> /save ~/chat-log.txt
+            You> /quit
+
+        SCRIPTING
+            Use koboldlib in your own scripts:
+
+                #include <koboldlib>
+
+                var ai = new KoboldApi(api);
+                string reply = ai.Generate("Hello, AI!");
+                Console.WriteLine(reply);
+
+            Raw generation (no system prompt or chat formatting):
+
+                var ai = new KoboldApi(api);
+                string text = ai.GenerateRaw("Complete this: The cat sat on");
+                Console.WriteLine(text);
+
+            See "man koboldlib" for the full library reference.
+
+        FILES
+            ~/.config/kobold.conf       Per-user settings
+            /etc/opt/kobold.conf        System-wide settings (root)
+            /bin/kobold.cs              This command
+            /lib/koboldlib.cs           Client library
+
+        SEE ALSO
+            man koboldlib, man settingslib, man curl

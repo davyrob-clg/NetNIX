@@ -29,6 +29,11 @@
   <ItemGroup>
     <Content Include="helpman\*.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- Factory files: copied to output preserving directory structure -->
+  <ItemGroup>
+    <Compile Remove="Factory\**" />
+    <Content Include="Factory\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Factory" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="NetNIX ICON 1.ico" />
     <Content Include="readme.txt" CopyToOutputDirectory="PreserveNewest" />

@@ -540,7 +540,7 @@ public sealed class NixApi
     // ?? Factory reinstall ????????????????????????????????????????????
 
     /// <summary>
-    /// Reinstall factory binaries, libraries, and man pages.
+    /// Reinstall factory binaries, libraries, man pages, and factory files.
     /// Overwrites existing files with the versions shipped with the executable.
     /// Root only.
     /// </summary>
@@ -550,6 +550,7 @@ public sealed class NixApi
         NetNIX.Setup.FirstRunSetup.InstallBuiltinScripts(_fs);
         NetNIX.Setup.FirstRunSetup.InstallBuiltinLibs(_fs);
         NetNIX.Setup.FirstRunSetup.InstallManPages(_fs);
+        NetNIX.Setup.FirstRunSetup.InstallFactoryFiles(_fs);
         _fs.Save();
         return true;
     }
