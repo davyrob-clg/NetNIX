@@ -117,16 +117,19 @@ void Boot()
 // ── Reset helpers ──────────────────────────────────────────────────
 static bool WaitForResetKey(TimeSpan timeout)
 {
-    var deadline = DateTime.UtcNow + timeout;
-    while (DateTime.UtcNow < deadline)
+    if (!Console.IsInputRedirected)
     {
-        if (Console.KeyAvailable)
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
         {
-            var key = Console.ReadKey(intercept: true);
-            if (key.Key == ConsoleKey.R && key.Modifiers.HasFlag(ConsoleModifiers.Control))
-                return true;
+            if (Console.KeyAvailable)
+            {
+                var key = Console.ReadKey(intercept: true);
+                if (key.Key == ConsoleKey.R && key.Modifiers.HasFlag(ConsoleModifiers.Control))
+                    return true;
+            }
+            Thread.Sleep(50);
         }
-        Thread.Sleep(50);
     }
     return false;
 }
