@@ -1,5 +1,6 @@
 using NetNIX.Users;
 using NetNIX.VFS;
+using System.Collections.Immutable;
 
 namespace NetNIX.Setup;
 
@@ -76,8 +77,39 @@ public static class FirstRunSetup
         }
 
         // 5. Write welcome motd
+
         var motd = "Welcome to NetNIX — a .NET powered multi-user UNIX environment.\n"u8.ToArray();
-        fs.CreateFile("/etc/motd", 0, 0, motd, "rw-r--r--");
+
+        // Add an external file motd - from config 
+
+        // 1. Define the filename
+        string fileName = "motd";
+
+        // 2. Get the directory where the .exe is running
+        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        // 3. Combine them to get the full absolute path
+        string fullPath = Path.Combine(baseDirectory, fileName);
+
+        // 4. Check if the file exists and load it
+        if (File.Exists(fullPath))
+        {
+            // Reads all text into a string variable
+            byte[] fileData = File.ReadAllBytes(fullPath);
+           // motd = fileContent.ToImmutableArray();
+
+            fs.CreateFile("/etc/motd", 0, 0, fileData, "rw-r--r--");
+            Console.WriteLine("MOTD File loaded successfully!");
+        }
+        else
+        {
+            Console.WriteLine($"File not found at: {fullPath}");
+            fs.CreateFile("/etc/motd", 0, 0, motd, "rw-r--r--");
+        }
+
+
+        
+        //fs.CreateFile("/etc/motd", 0, 0, motd, "rw-r--r--");
 
         // 5b. Install sandbox configuration (root-editable script security rules)
         Console.WriteLine("[*] Installing sandbox configuration...");
