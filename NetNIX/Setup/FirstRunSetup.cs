@@ -1,9 +1,15 @@
+/*
+Copyright (C) 2026 Michael Sullender
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see gnu.org
+*/
 using NetNIX.Users;
 using NetNIX.VFS;
 using System.Collections.Immutable;
 
 namespace NetNIX.Setup;
-
+//V2
 /// <summary>
 /// First-run setup wizard. Initialises the virtual file system, creates the
 /// standard directory tree and the root account.
@@ -426,9 +432,8 @@ public static class FirstRunSetup
             return;
         }
 
-        foreach (var (name, content) in pages)
+        foreach (var (path, content) in pages)
         {
-            string path = $"/usr/share/man/{name}.txt";
             var data = System.Text.Encoding.UTF8.GetBytes(content);
             if (fs.IsFile(path))
                 fs.WriteFile(path, data);
@@ -463,10 +468,16 @@ public static class FirstRunSetup
             // covered by GetDirectories, e.g. deeply nested paths)
             EnsureParentDirs(fs, path);
 
+            // Files in /bin/ or /sbin/ should be executable
+            string perms = (path.StartsWith("/bin/") || path.StartsWith("/sbin/") ||
+                            path.StartsWith("/usr/bin/") || path.StartsWith("/usr/sbin/") ||
+                            path.StartsWith("/usr/local/bin/") || path.EndsWith(".sh"))
+                ? "rwxr-xr-x" : "rw-r--r--";
+
             if (fs.IsFile(path))
                 fs.WriteFile(path, data);
             else
-                fs.CreateFile(path, 0, 0, data, "rw-r--r--");
+                fs.CreateFile(path, 0, 0, data, perms);
         }
 
         Console.WriteLine($"  Installed {files.Count} factory file(s)");
@@ -487,6 +498,11 @@ public static class FirstRunSetup
 
     private static string? ReadPassword()
     {
+        if (Console.IsInputRedirected)
+        {
+            return Console.ReadLine();
+        }
+
         var sb = new System.Text.StringBuilder();
         while (true)
         {

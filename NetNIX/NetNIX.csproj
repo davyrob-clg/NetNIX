@@ -19,6 +19,12 @@
     <Content Include="Builtins\*.cs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- System builtin scripts (sbin): not compiled, copied to output as content files -->
+  <ItemGroup>
+    <Compile Remove="SystemBuiltins\**" />
+    <Content Include="SystemBuiltins\*.cs" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- Builtin libraries: not compiled, copied to output as content files -->
   <ItemGroup>
     <Compile Remove="Libs\**" />
@@ -36,15 +42,17 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetNIX ICON 1.ico" />
-    <Content Include="readme.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <None Update="extra.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="motd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="License.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NetNIX.readme">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-</Project>
+  </Project>

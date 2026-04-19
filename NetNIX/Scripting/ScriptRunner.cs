@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2026 Michael Sullender
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see gnu.org
+*/
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -5,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using NetNIX.Users;
 using NetNIX.VFS;
 
+//ns version
 namespace NetNIX.Scripting;
 
 /// <summary>
@@ -133,15 +140,35 @@ public sealed class ScriptRunner
         // Preprocess #include directives — merge library sources into the script
         source = PreprocessIncludes(source, cwd, label);
 
+        // Load per-script sandbox exceptions
+        var exceptions = LoadSandboxExceptions(label);
+        // Also match by bare filename (e.g. "nxconfig" for "/sbin/nxconfig.cs")
+        string bareName = label.Contains('/') ? label.Substring(label.LastIndexOf('/') + 1) : label;
+        if (bareName.EndsWith(".cs")) bareName = bareName[..^3];
+        foreach (var ex in LoadSandboxExceptions(bareName))
+            exceptions.Add(ex);
+
         // Security: reject scripts that attempt to bypass the sandbox
-        if (!PassesSecurityScan(source, label))
+        if (!PassesSecurityScan(source, label, exceptions))
             return;
 
         int hash = source.GetHashCode();
 
+        // Determine extra assemblies needed based on exceptions
+        HashSet<string>? extraAssemblies = null;
+        foreach (var exc in exceptions)
+        {
+            if (ExceptionAssemblies.TryGetValue(exc, out var asms))
+            {
+                extraAssemblies ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var asm in asms)
+                    extraAssemblies.Add(asm);
+            }
+        }
+
         if (!_cache.TryGetValue(hash, out var assembly))
         {
-            assembly = Compile(source, label);
+            assembly = CompileExtended(source, label, extraAssemblies);
             if (assembly == null) return; // errors already printed
             _cache[hash] = assembly;
         }
@@ -169,11 +196,13 @@ public sealed class ScriptRunner
         }
         catch (TargetInvocationException ex) when (ex.InnerException != null)
         {
-            Console.WriteLine($"nsh: {label}: {ex.InnerException.Message}");
+            Console.ResetColor();
+            Console.Error.WriteLine($"nsh: {label}: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"nsh: {label}: {ex.Message}");
+            Console.ResetColor();
+            Console.Error.WriteLine($"nsh: {label}: {ex.GetType().Name}: {ex.Message}");
         }
     }
 
@@ -572,6 +601,15 @@ public sealed class ScriptRunner
         # httpd — HTTP server daemon (uncomment to enable)
         # httpd  System.Net
         # httpd  HttpListener(
+
+        # nxconfig — host environment configuration (reads/writes config file)
+        nxconfig  System.IO
+        nxconfig  File.Exists
+        nxconfig  File.Read
+        nxconfig  File.ReadAll
+        nxconfig  File.Write
+        nxconfig  File.WriteAll
+        nxconfig  Path.Combine
         """;
 
     /// <summary>

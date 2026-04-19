@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2026 Michael Sullender
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see gnu.org
+*/
 using System.Net;
 using System.Text;
 
@@ -230,6 +236,34 @@ public sealed class NixNet
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
             var content = new StringContent(body, Encoding.UTF8, contentType);
             using var response = client.PostAsync(url, content).GetAwaiter().GetResult();
+            response.EnsureSuccessStatusCode();
+            return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"net: POST {url}: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Perform an HTTP POST with a custom timeout and custom headers.
+    /// Creates a dedicated HttpClient so the default timeout is not affected.
+    /// </summary>
+    public string? PostWithTimeout(string url, string body, string contentType, int timeoutSeconds,
+        params (string name, string value)[] headers)
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(body, Encoding.UTF8, contentType)
+            };
+            foreach (var (name, value) in headers)
+                request.Headers.TryAddWithoutValidation(name, value);
+
+            using var response = client.SendAsync(request).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }

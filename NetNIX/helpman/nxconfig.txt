@@ -1,0 +1,117 @@
+
+        NAME
+            nxconfig - NetNIX environment configuration
+
+        SYNOPSIS
+            nxconfig
+            nxconfig get <key>
+            nxconfig set <key> <value>
+            nxconfig path
+            nxconfig --help
+
+        DESCRIPTION
+            Manages host-side configuration for the NetNIX environment.
+            Settings control how NetNIX boots, where the filesystem is
+            stored, and various display options.
+
+            The config file lives on the HOST filesystem alongside the
+            NetNIX executable at <exe-dir>/config/netnix.conf. It is
+            NOT part of the virtual filesystem.
+
+            On first launch, nxconfig.conf is created with default
+            values and detailed comments explaining each setting.
+
+            Only root can change settings with 'nxconfig set'.
+            All users can view settings with 'nxconfig' or 'nxconfig get'.
+
+        FLAGS
+            (no arguments)
+                Display all current settings with descriptions.
+
+            get <key>
+                Print the value of a specific setting.
+
+            set <key> <value>
+                Change a setting. Requires root. The config file is
+                updated in-place, preserving comments.
+
+            path
+                Print the full host path to the config file.
+
+            -h, --help
+                Show usage information.
+
+        SETTINGS
+            allow_reset       (true/false, default: true)
+                Controls whether the Ctrl+R reset option appears at
+                boot and whether the __reset__ login username works.
+                Set to false to prevent accidental environment wipes.
+
+            rootfs_path       (string, default: empty)
+                Path to a custom rootfs.zip archive. When empty, the
+                default location is used (AppData/Roaming/NetNIX/).
+                Can be absolute or relative to the executable directory.
+
+                This allows running multiple NetNIX instances with
+                different filesystems, or placing the rootfs beside
+                the executable for portable installations.
+
+                Examples:
+                    nxconfig set rootfs_path /path/to/custom.zip
+                    nxconfig set rootfs_path myworld.zip
+                    nxconfig set rootfs_path ""
+
+            instance_name     (string, default: "NetNIX Machine")
+                A human-readable name for this NetNIX instance.
+                Displayed in the boot banner. Available to scripts
+                for future networking features.
+
+            show_boot_banner  (true/false, default: true)
+                Whether to show the ASCII boot banner on startup.
+                Disabling this makes boot faster and quieter.
+
+            boot_timeout      (integer, default: 3)
+                Seconds to wait for Ctrl+R at boot. Only relevant
+                when allow_reset is true. Set to 0 to skip the wait.
+
+            login_banner      (string, default: "NetNIX Login")
+                Custom text shown at the login prompt.
+
+            motd_enabled      (true/false, default: true)
+                Whether to display /etc/motd after boot.
+
+            auto_save         (true/false, default: true)
+                Whether to automatically save the VFS when a user
+                logs out. If false, the VFS is only saved when a
+                script explicitly calls api.Save().
+
+        EXAMPLES
+            View all settings:
+                nxconfig
+
+            Get the instance name:
+                nxconfig get instance_name
+
+            Set a custom rootfs path:
+                sudo nxconfig set rootfs_path /opt/netnix/server.zip
+
+            Disable reset options:
+                sudo nxconfig set allow_reset false
+
+            Rename the instance:
+                sudo nxconfig set instance_name "Dev Server"
+
+            Disable boot banner for fast startup:
+                sudo nxconfig set show_boot_banner false
+                sudo nxconfig set boot_timeout 0
+
+            Find the config file:
+                nxconfig path
+
+        FILES
+            <exe-dir>/config/netnix.conf
+                Host-side configuration file. Created automatically
+                on first launch with default values and comments.
+
+        SEE ALSO
+            man nxai, man settingslib

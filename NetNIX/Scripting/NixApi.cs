@@ -1,4 +1,10 @@
-﻿using System.IO.Compression;
+﻿/*
+Copyright (C) 2026 Michael Sullender
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see gnu.org
+*/
+using System.IO.Compression;
 using System.Text;
 using NetNIX.Users;
 using NetNIX.VFS;
@@ -521,6 +527,56 @@ public sealed class NixApi
         if (!RequireRoot("importfile")) return false;
         string resolved = ResolvePath(vfsPath);
         return _fs.ImportFromHost(hostPath, resolved, Uid, Gid);
+    }
+
+    /// <summary>
+    /// Import a directory (and all its contents recursively) from the host
+    /// filesystem into the VFS. Root only. Returns the number of files
+    /// imported, or -1 on failure.
+    /// </summary>
+    public int ImportDirectory(string hostDir, string vfsDir)
+    {
+        if (!RequireRoot("importfile")) return -1;
+
+        string resolvedVfs = ResolvePath(vfsDir);
+
+        if (!System.IO.Directory.Exists(hostDir))
+        {
+            Console.Error.WriteLine($"importfile: {hostDir}: host directory not found");
+            return -1;
+        }
+
+        return ImportDirectoryRecursive(hostDir, resolvedVfs);
+    }
+
+    private int ImportDirectoryRecursive(string hostDir, string vfsDir)
+    {
+        // Ensure the VFS directory exists
+        if (!_fs.IsDirectory(vfsDir))
+            _fs.CreateDirectory(vfsDir, Uid, Gid, "rwxr-xr-x");
+
+        int count = 0;
+
+        // Import all files in this directory
+        foreach (var file in System.IO.Directory.GetFiles(hostDir))
+        {
+            string fileName = System.IO.Path.GetFileName(file);
+            string vfsPath = vfsDir.TrimEnd('/') + "/" + fileName;
+            if (_fs.ImportFromHost(file, vfsPath, Uid, Gid))
+                count++;
+        }
+
+        // Recurse into subdirectories
+        foreach (var subDir in System.IO.Directory.GetDirectories(hostDir))
+        {
+            string dirName = System.IO.Path.GetFileName(subDir);
+            string vfsSubDir = vfsDir.TrimEnd('/') + "/" + dirName;
+            int sub = ImportDirectoryRecursive(subDir, vfsSubDir);
+            if (sub >= 0)
+                count += sub;
+        }
+
+        return count;
     }
 
     // ?? Export ??????????????????????????????????????????????????????

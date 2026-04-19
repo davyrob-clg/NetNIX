@@ -90,6 +90,7 @@ The "api" object (type NixApi) is the ONLY way to interact with files, users, an
   #include <netlib>              HTTP helpers (NetLib.GetOrDefault, NetLib.PostJson)
   #include <settingslib>         Per-app settings (Settings.Get, Settings.Set, Settings.GetAll)
   #include <koboldlib>           AI generation (KoboldApi, KoboldChat)
+  #include <dotnet_lib_emu>      System.IO emulation (Vf=File, Vd=Directory, Vp=Path)
 
 === IMPORTANT ALTERNATIVES ===
 Since direct host filesystem and network access is blocked, here are the correct alternatives:

@@ -4,14 +4,20 @@
             npak - NetNIX package manager
 
         SYNOPSIS
-            npak install <package.npak>
+            npak install <package.npak> [package2.npak ...]
             npak remove <name>
             npak list
             npak info <name>
+            npak get search <query>
+            npak get install <name> [name2 ...]
+            npak get repos
 
         DESCRIPTION
             npak installs, removes, and manages packages in NetNIX.
             Packages are zip files with the .npak extension.
+
+            Packages can be installed from local .npak files, or
+            downloaded from remote repositories using 'npak get'.
 
             Only root (uid 0) can install or remove packages.
 
@@ -39,13 +45,42 @@
             The 'type' field can be 'app' or 'lib'.
 
         SUBCOMMANDS
-            install <path>  Install a .npak package from the VFS
+            install <path> [path2 ...]
+                            Install one or more local .npak packages
             remove <name>   Remove an installed package and its files
             list            List all installed packages
             info <name>     Show package details and installed files
+            get search <query>
+                            Search repositories for packages matching query
+            get install <name> [name2 ...]
+                            Download and install packages from repositories
+            get repos       List configured repositories
+
+        REPOSITORIES
+            Remote repositories are configured in /etc/npak/repos.conf.
+            The file is created automatically on first use of 'npak get'.
+
+            Format:  type=url
+
+            Supported repository types:
+                HTTPFile    Scans HTML directory listing at the URL for
+                            <a> links to .npak files matching the package
+                            name. For example, if the user runs:
+                              npak get install demo
+                            npak fetches the repo URL's HTML and looks
+                            for a link to 'demo.npak'.
+
+            Default repository:
+                HTTPFile=http://npak.controlfeed.org/
 
         EXAMPLES
             npak install /tmp/myapp.npak
+            npak install /tmp/foo.npak /tmp/bar.npak /tmp/baz.npak
+            npak get search kobold
+            npak get search lib
+            npak get install demo
+            npak get install dotnet-lib-emu myapp
+            npak get repos
             npak list
             npak info myapp
             npak remove myapp
@@ -68,10 +103,11 @@
 
         FILES
             /var/lib/npak/          Package receipt database
+            /etc/npak/repos.conf    Repository configuration
             /usr/local/bin/         Installed executables
             /usr/local/lib/         Installed libraries
             /usr/share/man/         Installed man pages
 
         SEE ALSO
-            zip, unzip, importfile
+            zip, unzip, importfile, wget
         

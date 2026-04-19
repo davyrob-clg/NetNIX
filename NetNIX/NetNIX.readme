@@ -1,0 +1,1029 @@
+﻿================================================================================
+                              N e t N I X
+              A .NET-Powered Virtual UNIX Environment
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  1.  What Is NetNIX?
+  2.  Key Features
+  3.  Who Is It For?
+  4.  System Requirements
+  5.  Getting Started
+  6.  First-Time Setup
+  7.  Using the Shell (nsh)
+  8.  Built-in Commands
+  9.  The Virtual File System
+  10. Writing Scripts (C#)
+  11. The Library System (#include)
+  12. Shell Scripting
+  13. The Sandbox
+  14. The Package Manager (npak)
+  15. Daemon Services
+  16. User & Group Management
+  17. The Text Editor
+  18. Networking API
+  19. Configuration (nxconfig)
+  20. Mount System
+  21. Manual Pages
+  22. Extending NetNIX
+  23. Project Structure
+  24. License & Contributing
+
+================================================================================
+1. WHAT IS NETNIX?
+================================================================================
+
+NetNIX is a self-contained, virtual UNIX-like operating environment built
+entirely in C# on .NET 8. It is not a real operating system — it runs as a
+normal console application on Windows, macOS, Android(via Termux), or Linux — but inside that
+application you get a fully functional multi-user system with its own
+filesystem, shell, user accounts, permissions, package manager, text editor,
+scripting engine, daemon services, networking, and more.
+
+Everything lives inside a single ZIP archive (the "rootfs") stored in your
+AppData folder. Nothing touches your real filesystem unless you explicitly
+use the host-bridging tools. You can reset, clone, or move an entire NetNIX
+machine by copying that one file.
+
+Think of it as a fantasy computer — like PICO-8 is to game consoles, NetNIX
+is to UNIX workstations.
+
+================================================================================
+2. KEY FEATURES
+================================================================================
+
+  Virtual File System (VFS)
+    • Full hierarchical filesystem (FHS layout: /bin, /etc, /home, /usr, …)
+    • UNIX-style permissions (rwxr-xr-x / octal 755 notation)
+    • Owner/group metadata per file and directory
+    • Backed by a single .zip archive — portable and self-contained
+    • Mount/unmount external .zip archives at arbitrary paths
+    • Auto-save on logout (configurable)
+
+  Interactive Shell (nsh)
+    • Command-line interface modelled after bash/sh
+    • Pipes (cmd1 | cmd2 | cmd3) with full stdout/stdin chaining
+    • Output redirection (> and >>)
+    • Quoting (single and double quotes)
+    • Tab-style command lookup across /bin, /sbin, /usr/bin, etc.
+    • Per-user startup scripts (~/.nshrc)
+
+  Multi-User System
+    • Root account and unlimited regular user accounts
+    • Password authentication (hashed)
+    • su / sudo with group-based privilege escalation
+    • User home directories with skeleton file templates
+    • Group management (create, delete, modify, membership)
+
+  C# Scripting Engine
+    • Write commands as plain-text .cs files — no project files needed
+    • Scripts are compiled at runtime using Roslyn and cached in memory
+    • Full access to a rich NixApi with file I/O, user queries, networking
+    • #include <library> system for code reuse across scripts
+    • Using-directive hoisting so libraries and scripts merge cleanly
+    • Sandboxed execution — scripts cannot touch the host by default
+
+  Security Sandbox
+    • Configurable via /etc/sandbox.conf (root-editable)
+    • Blocks dangerous namespaces (System.IO, System.Diagnostics, etc.)
+    • Blocks dangerous tokens (File.Create, Process.Start, etc.)
+    • Per-script exceptions via /etc/sandbox.exceptions
+    • Scripts must use NixApi for all operations
+
+  Package Manager (npak)
+    • Install, remove, and list .npak packages
+    • Remote repository support (HTTP directory listing)
+    • Packages can contain commands (/bin), libraries (/lib), and man pages
+    • Manifest-based metadata (name, version, description, type)
+    • Pre-configured public repository at npak.controlfeed.org(view in browser to see available packages)
+
+  Daemon Services
+    • Background script execution on dedicated threads
+    • Graceful shutdown via CancellationToken
+    • Start/stop/list/log management commands
+    • Built-in httpd daemon for serving /var/www over HTTP
+
+  Networking
+    • HTTP GET, POST, PUT, DELETE, PATCH exposed through api.Net
+    • Form-encoded and JSON POST support
+    • Custom header support
+    • Response status code inspection
+    • Byte array downloads for binary content
+    • Used by curl, wget, fetch, npak, and user scripts
+
+  Built-in Text Editor
+    • Line-based editor accessible via the "edit" command
+    • Insert, delete, replace, copy, move lines
+    • Search and go-to-line
+    • Suitable for editing scripts, configs, and documents in-place
+
+  Configuration System
+    • Host-side config (config/netnix.conf) for boot behaviour
+    • In-VFS nxconfig command for managing host settings from inside
+    • Instance naming, boot banners, MOTD, auto-save, reset control
+    • Settings library for script-level persistent key/value storage
+
+  Comprehensive Man Pages
+    • 50+ manual pages covering every command and concept
+    • man <topic>, man --list, man -k <keyword> search
+    • Topics include: api, scripting, sandbox, filesystem, permissions,
+      editor, include, daemon-writing, settingslib, and more
+
+================================================================================
+3. WHO IS IT FOR?
+================================================================================
+
+  Hobbyists & Retro Computing Enthusiasts
+    If you enjoy the idea of a small, self-contained computer you can tinker
+    with — like a fantasy console but for operating systems — NetNIX gives
+    you a safe playground. Boot it up, create users, write scripts, install
+    packages, and explore a UNIX-like world without any risk to your real
+    machine.
+
+  Students & Educators
+    NetNIX is an excellent educational tool:
+    • Learn UNIX fundamentals (filesystems, permissions, shells, pipes)
+      without needing a Linux VM or dual-boot setup.
+    • Learn C# by writing small, focused scripts with instant feedback.
+    • Learn systems programming concepts (user management, daemons,
+      sandboxing, package management) in a forgiving environment.
+    • Instructors can distribute pre-configured rootfs archives to students
+      with specific exercises or environments pre-loaded.
+
+  Aspiring Systems Developers
+    Study how a UNIX-like environment is built from scratch:
+    • Virtual filesystem with permissions and metadata
+    • Shell parsing, pipes, and redirection
+    • Runtime compilation and sandboxed execution
+    • User authentication and privilege escalation
+    • Package management with remote repositories
+    • Daemon lifecycle management
+
+  Developers & Tinkerers
+    • Use NetNIX as a development environment — write and test C# scripts
+      with a rich API, libraries, and a package ecosystem.
+    • The project is open source — fork it and use it as a foundation for
+      your own virtual environment, game OS, MUD shell, or embedded
+      scripting platform.
+    • Add your own commands by dropping .cs files into the Builtins/ or
+      SystemBuiltins/ directories and rebuilding.
+    • Create and publish npak packages for others to install.
+
+  Creative Projects
+    • Build interactive fiction or text adventures inside the environment.
+    • Create a classroom simulation where students manage a shared server.
+    • Use the networking API to build chat clients, API tools, or bots.
+    • Several AI-powered packages are available (kobold, nxai, koder).
+
+================================================================================
+4. SYSTEM REQUIREMENTS
+================================================================================
+
+  • .NET 8.0 Runtime (or SDK if building from source)
+  • Any platform supported by .NET 8: Windows, macOS, Linux, Android (via Termux)
+  • Console/terminal application — no GUI required
+  • Disk space: ~30 MB for the application + rootfs archive
+
+================================================================================
+5. GETTING STARTED
+================================================================================
+
+  Building from Source
+  ────────────────────
+    1. Clone the repository:
+         git clone https://github.com/squiblez/NetNIX.git
+         cd NetNIX
+
+    2. Build the project:
+         dotnet build
+
+    3. Run:
+         dotnet run --project NetNIX
+
+  Running a Published Build
+  ─────────────────────────
+    If you have a pre-built release, simply run the NetNIX executable.
+    On first launch it will guide you through setup.
+
+================================================================================
+6. FIRST-TIME SETUP
+================================================================================
+
+  When NetNIX starts for the first time (no rootfs.zip exists), it runs the
+  First-Time Setup wizard:
+
+    1. Creates the standard UNIX directory hierarchy (/bin, /etc, /home, …)
+    2. Installs default skeleton files for new users
+    3. Prompts you to set a root password
+    4. Creates the root account and the sudo group
+    5. Optionally creates a regular user account
+    6. Installs the sandbox configuration (/etc/sandbox.conf)
+    7. Installs all built-in commands into /bin and /sbin
+    8. Installs built-in libraries into /lib
+    9. Installs manual pages into /usr/share/man
+   10. Installs factory files (default configs, demo scripts)
+   11. Saves everything to the rootfs.zip archive
+
+  After setup, you are presented with the login prompt.
+
+================================================================================
+7. USING THE SHELL (nsh)
+================================================================================
+
+  After logging in, you are dropped into nsh (NetNIX Shell). The prompt
+  shows your username, hostname, current directory, and privilege level:
+
+    user@netnix:/home/user$          (regular user)
+    root@netnix:/root#               (root)
+
+  Basic Usage
+  ───────────
+    command arg1 arg2 "quoted arg"   Run a command with arguments
+    command > file                   Redirect output to a file
+    command >> file                  Append output to a file
+    cmd1 | cmd2 | cmd3              Pipe output between commands
+    help                            Show all available commands
+    man <topic>                     Read the manual page for a topic
+    man --list                      List all available manual pages
+    man -k <keyword>                Search manual pages
+    clear                           Clear the screen
+    exit / logout                   Log out of the current session
+
+  Quoting
+  ───────
+    Both single quotes ('...') and double quotes ("...") are supported.
+    Quoted strings preserve spaces as a single argument.
+
+  Shell Scripts
+  ─────────────
+    Source a file containing one command per line:
+      source myscript.sh
+      . myscript.sh
+
+    Lines starting with # are treated as comments.
+    The file ~/.nshrc is automatically sourced on login.
+
+================================================================================
+8. BUILT-IN COMMANDS
+================================================================================
+
+  Shell Builtins (implemented directly in nsh):
+  ──────────────────────────────────────────────
+    help          Show command overview
+    man           Manual page viewer
+    cd            Change directory (cd, cd ~, cd -)
+    write         Interactive file writer (end with ".")
+    chmod         Change file permissions (rwxr-xr-x or 755)
+    chown         Change file owner (root only)
+    stat          Display file/directory metadata
+    tree          Display directory tree
+    adduser       Create a new user (root only)
+    deluser       Delete a user (root only)
+    passwd        Change a user's password
+    su            Switch user
+    sudo          Run a command as root
+    users         List all users
+    groups        List all groups
+    run           Run a .cs script file explicitly
+    source / .    Execute a shell script
+    daemon        Manage background services
+    clear         Clear the terminal
+    exit/logout   End the session
+
+  User Commands (/bin/*.cs):
+  ──────────────────────────
+    ls            List directory contents
+    cat           Display file contents
+    cp            Copy files
+    mv            Move/rename files
+    rm            Remove files
+    mkdir         Create directories
+    rmdir         Remove empty directories
+    touch         Create empty files / update timestamps
+    head          Display first lines of a file
+    tail          Display last lines of a file
+    wc            Word, line, and character count
+    grep          Search file contents with pattern matching
+    find          Find files by name pattern
+    tee           Read stdin and write to file and stdout
+    echo          Print text
+    pwd           Print working directory
+    whoami        Print current username
+    id            Print user and group IDs
+    uname         Print system information
+    hostname      Print or set hostname
+    date          Print current date/time
+    env           Print environment information
+    basename      Strip directory from a path
+    dirname       Strip filename from a path
+    du            Estimate file/directory space usage
+    df            Report filesystem disk space usage
+    yes           Repeatedly output a string
+    true          Exit with success status
+    false         Exit with failure status
+    curl          Transfer data from a URL
+    wget          Download files from the web
+    fetch         Simple HTTP GET
+    cbcopy        Copy text to host clipboard
+    cbpaste       Paste text from host clipboard
+    zip           Create zip archives within the VFS
+    unzip         Extract zip archives within the VFS
+    edit          Text editor
+    settings-demo Demonstrate the settings library
+
+  System Administration Commands (/sbin/*.cs — root/sudo):
+  ─────────────────────────────────────────────────────────
+    useradd       Create users (scripting-friendly)
+    userdel       Delete users
+    usermod       Modify user properties
+    groupadd      Create groups
+    groupdel      Delete groups
+    groupmod      Modify group properties
+    mount         Mount external .zip archives into the VFS
+    umount        Unmount a mounted archive
+    export        Export files from the VFS to the host filesystem
+    importfile    Import files from the host filesystem into the VFS
+    reinstall     Reinstall factory built-in commands and files
+    npak          Package manager
+    npak-demo     Demonstrate package creation
+    nxconfig      View/edit host-side configuration
+    httpd         HTTP server daemon
+
+================================================================================
+9. THE VIRTUAL FILE SYSTEM
+================================================================================
+
+  NetNIX uses a fully in-memory virtual filesystem that is persisted as a
+  .zip archive on the host. All paths are UNIX-style (forward slashes,
+  rooted at "/").
+
+  Default Location
+  ─────────────────
+    Windows:  %APPDATA%\NetNIX\rootfs.zip
+    Linux:    ~/.config/NetNIX/rootfs.zip
+    macOS:    ~/Library/Application Support/NetNIX/rootfs.zip
+
+    (Configurable via nxconfig set rootfs_path <path>)
+
+  Directory Layout (FHS)
+  ──────────────────────
+    /bin            User command scripts
+    /sbin           System/admin command scripts
+    /lib            Shared libraries
+    /etc            Configuration files
+    /etc/passwd     User account database
+    /etc/group      Group database
+    /etc/motd       Message of the day
+    /etc/sandbox.conf       Sandbox rules
+    /etc/sandbox.exceptions Per-script sandbox overrides
+    /etc/skel       Skeleton files for new users
+    /etc/npak       Package manager configuration
+    /home           User home directories
+    /root           Root's home directory
+    /tmp            Temporary files (world-writable)
+    /usr            Secondary hierarchy
+    /usr/bin        Additional commands
+    /usr/lib        Additional libraries
+    /usr/local      Locally installed software
+    /usr/share/man  Manual pages
+    /var            Variable data
+    /var/lib/npak   Installed package database
+    /var/log        Log files
+    /var/www        Web server document root
+    /mnt            Mount points for external archives
+    /media          Removable media mount points
+    /opt            Optional application software
+    /srv            Service data
+    /proc           System information (virtual)
+    /dev            Device files (virtual)
+
+  Permissions
+  ───────────
+    Every file and directory has a 9-character permission string (rwxrwxrwx)
+    representing owner, group, and other access. Root (uid 0) bypasses all
+    permission checks.
+
+    Set permissions with chmod:
+      chmod rwxr-xr-x myfile       (symbolic)
+      chmod 755 myfile             (octal)
+
+    Change ownership with chown (root only):
+      chown username myfile
+
+  Persistence
+  ───────────
+    The VFS is saved to the rootfs archive:
+    • Automatically on logout (if auto_save is enabled)
+    • After most write operations (file creation, deletion, etc.)
+    • Mounted archives can be configured for auto-save
+
+================================================================================
+10. WRITING SCRIPTS (C#)
+================================================================================
+
+  Scripts are plain-text .cs files stored in the virtual filesystem. They
+  are compiled at runtime by Roslyn and executed inside the NetNIX sandbox.
+
+  Basic Structure
+  ───────────────
+    Every script must contain a class with a static Run method:
+
+      using System;
+      using NetNIX.Scripting;
+
+      public class MyCommand
+      {
+          static int Run(NixApi api, string[] args)
+          {
+              Console.WriteLine("Hello from NetNIX!");
+              return 0;  // 0 = success
+          }
+      }
+
+    The class name does not matter — the runner finds the first class with
+    a matching Run(NixApi, string[]) signature.
+
+  Installing a Script as a Command
+  ─────────────────────────────────
+    Place your .cs file in /bin (user commands) or /sbin (admin commands):
+
+      edit /bin/mycommand.cs
+
+    Then run it by name:
+
+      mycommand arg1 arg2
+
+    Scripts are searched in this order:
+      1. Current working directory
+      2. /bin
+      3. /sbin
+      4. /usr/bin
+      5. /usr/sbin
+      6. /usr/local/bin
+      7. /usr/local/sbin
+
+  The NixApi Object
+  ──────────────────
+    The api parameter provides safe access to the entire environment:
+
+    File Operations:
+      api.ReadText(path)         Read a file as a string
+      api.WriteText(path, text)  Write/create a file
+      api.ReadBytes(path)        Read a file as byte[]
+      api.WriteBytes(path, data) Write/create a binary file
+      api.AppendText(path, text) Append to a file
+      api.Exists(path)           Check if path exists
+      api.IsFile(path)           Check if path is a file
+      api.IsDirectory(path)      Check if path is a directory
+      api.ListDirectory(path)    List directory contents
+      api.Delete(path)           Delete a file or directory
+      api.Copy(src, dest)        Copy a file
+      api.Move(src, dest)        Move/rename a file
+      api.CreateDir(path)        Create a directory
+      api.CreateDirWithParents(path)  Create directories recursively
+
+    Path Helpers:
+      api.ResolvePath(path)      Resolve relative to cwd
+      api.GetName(path)          Get filename component
+      api.GetParent(path)        Get parent directory
+      api.Cwd                    Current working directory
+
+    User Information:
+      api.Uid                    Current user ID
+      api.Gid                    Current group ID
+      api.Username               Current username
+      api.GetUsername(uid)        Look up username by UID
+      api.GetGroupName(gid)      Look up group name by GID
+
+    Permission Checks:
+      api.CanRead(path)
+      api.CanWrite(path)
+      api.CanExecute(path)
+      api.GetPermissions(path)
+
+    Networking (see Section 18):
+      api.Net.Get(url)
+      api.Net.Post(url, body)
+      ... and more
+
+    Persistence:
+      api.Save()                 Save the VFS to disk
+
+  Running Scripts Explicitly
+  ──────────────────────────
+    run /path/to/script.cs arg1 arg2
+
+  Compilation Caching
+  ───────────────────
+    Compiled assemblies are cached by source hash. If you edit a script,
+    the next run recompiles it automatically.
+
+================================================================================
+11. THE LIBRARY SYSTEM (#include)
+================================================================================
+
+  Scripts can share code through the #include directive, similar to C/C++.
+
+  Usage
+  ─────
+    #include <libraryname>         Search /lib, /usr/lib, /usr/local/lib
+    #include "path/to/file.cs"     Resolve relative to cwd or absolute
+
+  How It Works
+  ────────────
+    1. The script runner preprocesses all #include directives before
+       compilation.
+    2. Library source code is merged into the script source.
+    3. Using directives are hoisted and deduplicated to prevent errors.
+    4. Circular includes are detected and skipped.
+    5. Includes are resolved recursively (libraries can include libraries).
+
+  Built-in Libraries
+  ──────────────────
+    demoapilib    Demo/example library showing API usage patterns
+    netlib        Networking helper library
+    settingslib   Persistent key/value settings storage for scripts
+    ziplib        Zip archive manipulation within the VFS
+
+  Creating a Library
+  ──────────────────
+    Place a .cs file in /lib:
+
+      edit /lib/mylib.cs
+
+    Then include it from any script:
+
+      #include <mylib>
+
+================================================================================
+12. SHELL SCRIPTING
+================================================================================
+
+  Shell scripts are text files containing one nsh command per line.
+  Lines starting with # are comments.
+
+  Running a Shell Script
+  ──────────────────────
+    source myscript.sh
+    . myscript.sh
+
+  Startup Script
+  ──────────────
+    ~/.nshrc is automatically sourced when you log in. Use it to set up
+    your environment:
+
+      # ~/.nshrc
+      echo "Welcome back!"
+      echo ""
+
+  Example Script (Factory/bin/scripting-demo.sh)
+  ───────────────────────────────────────────────
+    Shell scripts can call any built-in or script command. They are useful
+    for automating repetitive tasks, setting up environments, or running
+    a sequence of operations.
+
+================================================================================
+13. THE SANDBOX
+================================================================================
+
+  All scripts run inside a security sandbox that prevents them from
+  accessing the host operating system directly. This is enforced at
+  compile-time by scanning the script source code.
+
+  What Is Blocked by Default
+  ──────────────────────────
+    • System.IO (File, Directory, Stream, etc.)
+    • System.Diagnostics (Process.Start, etc.)
+    • System.Net (HttpClient, Socket, etc.)
+    • System.Reflection (Assembly.Load, etc.)
+    • System.Runtime.InteropServices (DllImport, Marshal)
+    • System.Security
+    • System.CodeDom
+    • Environment.Exit, Environment.CurrentDirectory, etc.
+
+  Configuration
+  ─────────────
+    The sandbox is configured in /etc/sandbox.conf (root-editable):
+
+      [blocked_usings]
+      System.IO
+      System.Diagnostics
+      ...
+
+      [blocked_tokens]
+      File.Create
+      Process.Start
+      ...
+
+  Per-Script Exceptions
+  ─────────────────────
+    Some trusted scripts (like nxconfig or httpd) need host access. These
+    are granted exceptions in /etc/sandbox.exceptions:
+
+      nxconfig  System.IO
+      nxconfig  File.Exists
+      httpd     System.Net
+
+    Format: <script-name> <namespace-or-token>
+    Use "*" as the script name to apply to all scripts.
+
+  Scripts Must Use NixApi
+  ───────────────────────
+    Instead of System.IO.File.ReadAllText(), use api.ReadText().
+    Instead of new HttpClient(), use api.Net.Get().
+    The NixApi provides safe, sandboxed equivalents for all common
+    operations.
+
+================================================================================
+14. THE PACKAGE MANAGER (npak)
+================================================================================
+
+  npak is NetNIX's built-in package manager for distributing and installing
+  software packages.
+
+  Package Format (.npak)
+  ──────────────────────
+    A .npak file is a zip archive containing:
+      manifest.txt   Metadata (name, version, description, type)
+      bin/           Executable scripts → installed to /usr/local/bin/
+      lib/           Libraries → installed to /usr/local/lib/
+      man/           Manual pages → installed to /usr/share/man/
+
+  Commands
+  ────────
+    npak install <file.npak>       Install a local package
+    npak remove <package>          Uninstall a package
+    npak list                      List installed packages
+    npak info <package>            Show package details
+    npak get list                  List packages available from repos
+    npak get install <package>     Download and install from a repository
+    npak get update                Refresh repository package lists
+
+  Repository Configuration
+  ────────────────────────
+    Repositories are listed in /etc/npak/repos.conf:
+
+      HTTPFile=http://npak.controlfeed.org/
+
+    The default repository hosts community packages including:
+      kobold    AI chat client for KoboldCpp
+      nxai      Unified AI chat interface
+      koder     AI-powered command generator
+
+  Creating Packages
+  ─────────────────
+    Use npak-demo as a reference, or see "man npak" for full details.
+    Create a manifest.txt and zip it with your scripts/libs/man pages.
+
+================================================================================
+15. DAEMON SERVICES
+================================================================================
+
+  Daemons are long-running background scripts managed by the daemon command.
+
+  Writing a Daemon
+  ────────────────
+    Instead of a Run method, daemons implement:
+
+      static int Daemon(NixApi api, string[] args)
+      {
+          while (!api.DaemonToken.IsCancellationRequested)
+          {
+              // Do background work
+              Thread.Sleep(1000);
+          }
+          return 0;
+      }
+
+    Check api.DaemonToken regularly for graceful shutdown.
+
+  Managing Daemons
+  ────────────────
+    daemon start <name> <script.cs>   Start a daemon
+    daemon stop <pid|name>            Stop a running daemon
+    daemon list                       List all daemons and their status
+    daemon log <pid|name>             View daemon output log
+
+    Only root can start and stop daemons.
+
+  Built-in Daemons
+  ────────────────
+    httpd — A simple HTTP server that serves files from /var/www.
+    Enable it with sandbox exceptions for System.Net, then:
+      daemon start httpd /sbin/httpd.cs
+
+================================================================================
+16. USER & GROUP MANAGEMENT
+================================================================================
+
+  Users
+  ─────
+    adduser <username>       Interactive user creation (shell builtin)
+    useradd <username>       Scripting-friendly user creation
+    deluser <username>       Delete a user
+    userdel <username>       Delete a user (with options)
+    usermod <username>       Modify user properties
+    passwd [username]        Change password
+    su <username>            Switch to another user
+    sudo <command>           Run a command as root
+    users                    List all users
+    whoami                   Print current username
+    id                       Print UID and GID
+
+  Groups
+  ──────
+    groupadd <name>          Create a group
+    groupdel <name>          Delete a group
+    groupmod <name>          Modify a group
+    groups                   List all groups
+
+  Sudo
+  ────
+    Users must be in the "sudo" group to use the sudo command.
+    sudo prompts for the user's own password, then temporarily elevates
+    to root for the duration of the command.
+
+  User Data
+  ─────────
+    User accounts:    /etc/passwd
+    Group database:   /etc/group
+    Home directories: /home/<username>
+    Skeleton files:   /etc/skel (copied to new home directories)
+
+================================================================================
+17. THE TEXT EDITOR
+================================================================================
+
+  NetNIX includes a line-based text editor, invoked with:
+
+    edit <filename>
+
+  The editor loads the file (or creates a new one) and presents a numbered
+  line listing. Commands are entered at the "edit>" prompt:
+
+    i <n> <text>     Insert text at line n
+    a <text>         Append text at the end
+    d <n>            Delete line n
+    r <n> <text>     Replace line n
+    p                Print all lines with numbers
+    s <text>         Search for text
+    g <n>            Go to / display line n
+    w                Write (save) the file
+    q                Quit (prompts if unsaved)
+    wq               Write and quit
+    h                Show help
+
+  See "man editor" or "man edit" for full documentation.
+
+================================================================================
+18. NETWORKING API
+================================================================================
+
+  Scripts access the network through api.Net, which provides synchronous
+  HTTP methods bridging the host's network into the sandbox.
+
+  Available Methods
+  ─────────────────
+    api.Net.Get(url)                         HTTP GET → string
+    api.Net.GetBytes(url)                    HTTP GET → byte[]
+    api.Net.Post(url, body, contentType)     HTTP POST → string
+    api.Net.PostForm(url, fields...)         Form POST → string
+    api.Net.Put(url, body, contentType)      HTTP PUT → string
+    api.Net.Delete(url)                      HTTP DELETE → string
+    api.Net.Patch(url, body, contentType)    HTTP PATCH → string
+    api.Net.Head(url)                        HTTP HEAD → headers
+    api.Net.GetWithHeaders(url, headers)     GET with custom headers
+    api.Net.PostWithHeaders(url, body, contentType, headers)
+    api.Net.GetStatusCode(url)               Get HTTP status code
+
+  Built-in Network Commands
+  ─────────────────────────
+    curl <url>            Fetch and display URL content
+    wget <url> <dest>     Download a file to the VFS
+    fetch <url>           Simple HTTP GET and print
+
+  Note: Direct use of HttpClient/Socket/etc. in scripts is blocked by the
+  sandbox. Always use api.Net for network access.
+
+================================================================================
+19. CONFIGURATION (nxconfig)
+================================================================================
+
+  NetNIX has a host-side configuration file (config/netnix.conf) that
+  controls boot and runtime behaviour. Manage it from inside the shell
+  with the nxconfig command:
+
+    nxconfig list                  Show all settings and current values
+    nxconfig get <key>             Get a specific setting
+    nxconfig set <key> <value>     Change a setting
+    nxconfig reset                 Reset all settings to defaults
+
+  Available Settings
+  ──────────────────
+    instance_name      Human-readable name for this machine
+    show_boot_banner   Show/hide the boot banner (true/false)
+    boot_timeout       Seconds to wait for Ctrl+R reset at boot
+    allow_reset        Enable/disable environment reset feature
+    motd_enabled       Show/hide /etc/motd on login
+    auto_save          Auto-save VFS on logout (true/false)
+    login_banner       Custom text at the login prompt
+    rootfs_path        Custom path to the rootfs.zip archive
+
+  Reset Feature
+  ─────────────
+    If allow_reset is true, you can:
+    • Press Ctrl+R during the boot timeout to wipe and re-run setup
+    • Log in as "__reset__" to trigger a reset
+    This completely destroys the current rootfs and starts fresh.
+
+================================================================================
+20. MOUNT SYSTEM
+================================================================================
+
+  External .zip archives can be mounted into the VFS at any path:
+
+    mount <host-path.zip> <vfs-mount-point>
+    mount <host-path.zip> <vfs-mount-point> --autosave
+
+  Files from the mounted archive appear under the mount point. With
+  --autosave, changes are written back to the archive on modification.
+
+  Unmount with:
+
+    umount <vfs-mount-point>
+
+  This is useful for sharing files between NetNIX instances or importing
+  content from external sources.
+
+================================================================================
+21. MANUAL PAGES
+================================================================================
+
+  NetNIX ships with 50+ manual pages covering every command and concept.
+
+    man <topic>          Read a manual page
+    man --list           List all available pages
+    man -k <keyword>     Search pages by keyword
+
+  Key Documentation Topics
+  ────────────────────────
+    man api              Full NixApi reference
+    man scripting        How to write C# scripts
+    man include          The #include library system
+    man editor           Text editor guide
+    man filesystem       Filesystem hierarchy overview
+    man permissions      Permission system explained
+    man sandbox          Sandbox security model
+    man sandbox.exceptions  Per-script overrides
+    man settingslib      Settings library for scripts
+    man daemon           Daemon management
+    man daemon-writing   How to write daemon scripts
+    man httpd            HTTP server daemon
+    man npak             Package manager guide
+    man nshrc            Shell startup scripts
+
+  You can create your own man pages by placing .txt files in
+  /usr/share/man/:
+
+    edit /usr/share/man/mytopic.txt
+
+================================================================================
+22. EXTENDING NETNIX
+================================================================================
+
+  Adding Commands at Runtime
+  ──────────────────────────
+    Write a .cs file and place it in /bin or /usr/local/bin:
+      edit /bin/mycommand.cs
+
+  Adding Commands at Build Time
+  ─────────────────────────────
+    Drop .cs files into the source tree:
+      Builtins/       → installed to /bin   (user commands)
+      SystemBuiltins/ → installed to /sbin  (admin commands)
+    These are automatically included in the build output and installed
+    during first-run setup.
+
+  Adding Libraries
+  ────────────────
+    Place .cs files in:
+      Libs/           → installed to /lib   (at build time)
+      /lib/           → available immediately (at runtime)
+
+  Adding Manual Pages
+  ───────────────────
+    Place .txt files in:
+      helpman/        → installed to /usr/share/man (at build time)
+      /usr/share/man/ → available immediately (at runtime)
+
+  Adding Factory Files
+  ────────────────────
+    Place files in the Factory/ directory tree. The directory structure
+    maps directly to VFS paths:
+      Factory/etc/myapp/config.txt → /etc/myapp/config.txt
+
+  Creating Packages
+  ─────────────────
+    Bundle scripts, libraries, and man pages into .npak archives for
+    distribution through the package manager.
+
+  Forking the Project
+  ───────────────────
+    NetNIX is open source. You can:
+    • Add new shell builtins in Shell/NixShell.cs
+    • Extend the NixApi in Scripting/NixApi.cs
+    • Add new VFS features in VFS/VirtualFileSystem.cs
+    • Modify the sandbox rules in Scripting/ScriptRunner.cs
+    • Change the boot sequence in Program.cs
+    • Create entirely new subsystems
+
+================================================================================
+23. PROJECT STRUCTURE
+================================================================================
+
+  NetNIX/
+  ├── Program.cs                  Entry point, boot sequence, login loop
+  ├── NetNIX.csproj               Project file (.NET 8)
+  ├── NetNIX.readme               This file
+  │
+  ├── Shell/
+  │   └── NixShell.cs             Interactive shell (nsh) with builtins
+  │
+  ├── VFS/
+  │   ├── VirtualFileSystem.cs    ZIP-backed virtual filesystem
+  │   └── VfsNode.cs              File/directory node with permissions
+  │
+  ├── Scripting/
+  │   ├── ScriptRunner.cs         Roslyn-based C# script compiler/runner
+  │   ├── NixApi.cs               API surface exposed to scripts
+  │   ├── NixNet.cs               Networking API (HTTP client)
+  │   └── DaemonManager.cs        Background service manager
+  │
+  ├── Users/
+  │   ├── UserManager.cs          User/group CRUD and authentication
+  │   ├── UserRecord.cs           User account data model
+  │   └── GroupRecord.cs          Group data model
+  │
+  ├── Config/
+  │   └── NxConfig.cs             Host-side configuration manager
+  │
+  ├── Setup/
+  │   ├── FirstRunSetup.cs        First-run wizard
+  │   ├── BuiltinScripts.cs       Loader for Builtins/ and SystemBuiltins/
+  │   ├── BuiltinLibs.cs          Loader for Libs/
+  │   ├── BuiltinManPages.cs      Loader for helpman/
+  │   └── FactoryFiles.cs         Loader for Factory/
+  │
+  ├── Builtins/                   User commands (.cs) → /bin
+  │   ├── ls.cs, cat.cs, cp.cs, mv.cs, rm.cs, mkdir.cs, ...
+  │   ├── grep.cs, find.cs, head.cs, tail.cs, wc.cs, tee.cs, ...
+  │   ├── curl.cs, wget.cs, fetch.cs, edit.cs, zip.cs, unzip.cs, ...
+  │   └── echo.cs, pwd.cs, whoami.cs, id.cs, uname.cs, date.cs, ...
+  │
+  ├── SystemBuiltins/             Admin commands (.cs) → /sbin
+  │   ├── useradd.cs, userdel.cs, usermod.cs
+  │   ├── groupadd.cs, groupdel.cs, groupmod.cs
+  │   ├── mount.cs, umount.cs, export.cs, importfile.cs
+  │   ├── npak.cs, npak-demo.cs, nxconfig.cs
+  │   ├── httpd.cs, reinstall.cs
+  │   └── ...
+  │
+  ├── Libs/                       Libraries (.cs) → /lib
+  │   ├── demoapilib.cs
+  │   ├── netlib.cs
+  │   ├── settingslib.cs
+  │   └── ziplib.cs
+  │
+  ├── helpman/                    Manual pages (.txt) → /usr/share/man
+  │   ├── (50+ .txt files for every command and concept)
+  │   └── ...
+  │
+  └── Factory/                    Factory files → / (preserving structure)
+      ├── bin/
+      │   └── scripting-demo.sh
+      └── etc/
+          └── opt/
+              └── koder/
+                  └── commandprompt.txt
+
+================================================================================
+24. LICENSE & CONTRIBUTING
+================================================================================
+
+  NetNIX is open source. Visit the repository for license details and
+  contribution guidelines:
+
+    https://github.com/squiblez/NetNIX
+
+  Contributions welcome! Whether it's new commands, libraries, packages,
+  man pages, bug fixes, or entirely new features — pull requests and
+  issues are appreciated.
+
+================================================================================
+
+  Thank you for using NetNIX!
+
+  "A .NET fantasy computer for the curious mind."
+
+================================================================================

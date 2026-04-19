@@ -1,3 +1,9 @@
+/*
+Copyright (C) 2026 Michael Sullender
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see gnu.org
+*/
 using System.Text;
 using NetNIX.Scripting;
 using NetNIX.Users;
@@ -17,6 +23,12 @@ public sealed class NixShell
     private UserRecord _currentUser;
     private string _cwd;
     private bool _running = true;
+
+    /// <summary>
+    /// True when the current command is receiving piped input.
+    /// Scripts can check this to determine if stdin has data.
+    /// </summary>
+    public static bool IsPiped { get; set; }
 
     public NixShell(VirtualFileSystem fs, UserManager userMgr, ScriptRunner scriptRunner, DaemonManager daemonMgr, UserRecord user)
     {
@@ -48,16 +60,146 @@ public sealed class NixShell
 
             try
             {
-                Execute(input);
+                ExecuteLine(input);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"nsh: {ex.Message}");
+                Console.ResetColor();
+                Console.WriteLine($"nsh: unhandled exception: {ex.GetType().Name}: {ex.Message}");
             }
         }
     }
 
-    // ?? Command dispatcher ?????????????????????????????????????????
+    // —— Command dispatcher ———————————————————————————————————————————
+
+    /// <summary>
+    /// Top-level input handler. Splits on unquoted pipe characters and
+    /// chains commands so that each command's stdout becomes the next
+    /// command's stdin — just like UNIX pipes.
+    /// </summary>
+    private void ExecuteLine(string input)
+    {
+        // Split input on unquoted '|'
+        var segments = SplitPipes(input);
+
+        if (segments.Count == 1)
+        {
+            // No pipe — run directly (fast path, no extra StringWriter)
+            Execute(segments[0].Trim());
+            return;
+        }
+
+        // Pipeline: capture stdout of each stage, feed as stdin to the next
+        TextWriter originalOut = Console.Out;
+        TextReader originalIn = Console.In;
+        string previousOutput = null;
+
+        try
+        {
+            for (int i = 0; i < segments.Count; i++)
+            {
+                string segment = segments[i].Trim();
+                if (segment.Length == 0) continue;
+
+                bool isLast = (i == segments.Count - 1);
+
+                // Feed previous command's output as this command's stdin
+                if (previousOutput != null)
+                {
+                    Console.SetIn(new StringReader(previousOutput));
+                    IsPiped = true;
+                }
+                else
+                {
+                    IsPiped = false;
+                }
+
+                // Capture this command's output (unless it's the last stage)
+                StringWriter? stageCapture = null;
+                if (!isLast)
+                {
+                    stageCapture = new StringWriter();
+                    Console.SetOut(stageCapture);
+                }
+                else
+                {
+                    // Last stage writes to the real console (or redirect handles it)
+                    Console.SetOut(originalOut);
+                }
+
+                try
+                {
+                    Execute(segment);
+                }
+                catch (Exception ex)
+                {
+                    Console.SetOut(originalOut);
+                    Console.SetIn(originalIn);
+                    Console.ResetColor();
+                    Console.Error.WriteLine($"nsh: pipe stage {i + 1}: {ex.GetType().Name}: {ex.Message}");
+                    return;
+                }
+
+                if (stageCapture != null)
+                {
+                    Console.SetOut(originalOut);
+                    previousOutput = stageCapture.ToString();
+                }
+                else
+                {
+                    previousOutput = null;
+                }
+            }
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetIn(originalIn);
+            IsPiped = false;
+        }
+    }
+
+    /// <summary>
+    /// Split an input line on unquoted '|' characters.
+    /// Respects single and double quotes.
+    /// </summary>
+    private static List<string> SplitPipes(string input)
+    {
+        var segments = new List<string>();
+        var sb = new StringBuilder();
+        bool inQuote = false;
+        char quoteChar = '"';
+
+        foreach (char c in input)
+        {
+            if (inQuote)
+            {
+                if (c == quoteChar)
+                    inQuote = false;
+                sb.Append(c);
+            }
+            else if (c == '"' || c == '\'')
+            {
+                inQuote = true;
+                quoteChar = c;
+                sb.Append(c);
+            }
+            else if (c == '|')
+            {
+                segments.Add(sb.ToString());
+                sb.Clear();
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+
+        if (sb.Length > 0)
+            segments.Add(sb.ToString());
+
+        return segments;
+    }
 
     private void Execute(string input)
     {
@@ -134,13 +276,26 @@ public sealed class NixShell
                     break;
             }
         }
-        finally
+        catch (Exception ex)
         {
+            // Restore console state before printing
             if (capture != null)
             {
                 Console.SetOut(originalOut);
-                string output = capture.ToString();
-                string fullPath = VirtualFileSystem.ResolvePath(_cwd, redirectFile!);
+                capture = null;
+            }
+            Console.ResetColor();
+            Console.Error.WriteLine($"nsh: {cmd}: {ex.GetType().Name}: {ex.Message}");
+        }
+        finally
+        {
+            try
+            {
+                if (capture != null)
+                {
+                    Console.SetOut(originalOut);
+                    string output = capture.ToString();
+                    string fullPath = VirtualFileSystem.ResolvePath(_cwd, redirectFile!);
 
                 // Permission check for redirection target
                 bool allowed = true;
@@ -181,10 +336,17 @@ public sealed class NixShell
                     _fs.Save();
                 }
             }
+            }
+            catch (Exception ex)
+            {
+                Console.SetOut(originalOut);
+                Console.ResetColor();
+                Console.Error.WriteLine($"nsh: redirect error: {ex.GetType().Name}: {ex.Message}");
+            }
         }
     }
 
-    // ?? Builtin commands ???????????????????????????????????????????
+    // —— Builtin commands ———————————————————————————————————————————
 
     private void CmdHelp()
     {
@@ -205,7 +367,7 @@ public sealed class NixShell
             whoami  id  uname  hostname  date  env
             basename  dirname  du  df  yes  true  false
             curl  wget  fetch  cbpaste  cbcopy  zip  unzip
-            edit  kobold  koder  settings-demo
+            edit  nxconfig  settings-demo
 
           System admin commands (/sbin/*.cs — root/sudo):
             useradd  userdel  usermod
@@ -223,13 +385,16 @@ public sealed class NixShell
             man sandbox              Script sandbox security
             man sandbox.exceptions   Per-script sandbox overrides
             man settingslib          Application settings library
+            man dotnet_lib_emu       .NET System.IO emulation library
             man nshrc                Shell startup scripts
             man daemon               Daemon management commands
             man daemon-writing       How to write daemon scripts
             man httpd                Built-in HTTP server daemon
-            man kobold               AI chat client for KoboldCpp
-            man koboldlib            KoboldCpp client library
-            man koder                AI command generator
+
+          Additional packages (install via npak):
+            npak get install kobold      AI chat client for KoboldCpp
+            npak get install nxai        Unified AI chat interface
+            npak get install koder       AI command generator
 
           Shell scripts:
             source <file>       Execute a shell script (one command per line)
@@ -572,7 +737,7 @@ public sealed class NixShell
         // Root doesn't need sudo
         if (_currentUser.Uid == 0)
         {
-            Execute(string.Join(' ', args));
+            ExecuteLine(string.Join(' ', args));
             return;
         }
 
@@ -607,7 +772,7 @@ public sealed class NixShell
 
         try
         {
-            Execute(string.Join(' ', args));
+            ExecuteLine(string.Join(' ', args));
         }
         finally
         {
@@ -741,6 +906,11 @@ public sealed class NixShell
 
     private static string? ReadPassword()
     {
+        if (Console.IsInputRedirected)
+        {
+            return Console.ReadLine();
+        }
+
         var sb = new StringBuilder();
         while (true)
         {
@@ -798,7 +968,7 @@ public sealed class NixShell
         if (scriptPath.EndsWith(".cs") && !content.TrimStart().StartsWith('#'))
             return false; // Let the "command not found" message show
 
-        SourceFile(scriptPath);
+        SourceFile(scriptPath, args.ToArray());
         return true;
     }
 
@@ -886,34 +1056,883 @@ public sealed class NixShell
         SourceFile(path);
     }
 
-    private void SourceFile(string vfsPath)
+    private void SourceFile(string vfsPath, string[]? scriptArgs = null)
     {
         string content = Encoding.UTF8.GetString(_fs.ReadFile(vfsPath));
         var lines = content.Replace("\r\n", "\n").Split('\n');
 
-        foreach (var rawLine in lines)
+        // Script-local variables (includes positional params $1-$9)
+        var vars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        vars["0"] = vfsPath;
+        if (scriptArgs != null)
         {
-            string line = rawLine.Trim();
+            for (int i = 0; i < scriptArgs.Length && i < 9; i++)
+                vars[(i + 1).ToString()] = scriptArgs[i];
+            vars["#"] = scriptArgs.Length.ToString();
+            vars["@"] = string.Join(" ", scriptArgs);
+        }
+        else
+        {
+            vars["#"] = "0";
+            vars["@"] = "";
+        }
+        vars["?"] = "0"; // last exit code
 
-            // Skip blank lines and comments
-            if (line.Length == 0 || line.StartsWith('#'))
+        InterpretLines(lines, 0, lines.Length, vars, vfsPath);
+    }
+
+    /// <summary>
+    /// Interpret shell lines from startIdx (inclusive) to endIdx (exclusive).
+    /// Supports: if/elif/else/fi, for/do/done, while/do/done, case/esac,
+    /// variable assignment (VAR=value), command substitution $(cmd),
+    /// and all standard variable expansions.
+    /// Returns the index of the line after the last consumed line.
+    /// </summary>
+    private int InterpretLines(string[] lines, int startIdx, int endIdx,
+        Dictionary<string, string> vars, string label)
+    {
+        int i = startIdx;
+        while (i < endIdx && _running)
+        {
+            string raw = lines[i].Trim();
+
+            // Skip blank lines, comments, shebang
+            if (raw.Length == 0 || raw.StartsWith('#'))
+            {
+                i++;
                 continue;
+            }
 
-            // Expand shell variables
-            line = ExpandVariables(line);
+            // Expand variables
+            string line = ExpandScriptVars(raw, vars);
+
+            // ?? Variable assignment: VAR=value ?????????????????????
+            if (IsAssignment(line, out string aKey, out string aVal))
+            {
+                vars[aKey] = ExpandCommandSubstitutions(aVal, vars, label);
+                i++;
+                continue;
+            }
+
+            // ?? if / elif / else / fi ??????????????????????????????
+            if (line.StartsWith("if "))
+            {
+                i = HandleIf(lines, i, endIdx, vars, label);
+                continue;
+            }
+
+            // ?? for VAR in ... ; do ... done ???????????????????????
+            if (line.StartsWith("for "))
+            {
+                i = HandleFor(lines, i, endIdx, vars, label);
+                continue;
+            }
+
+            // ?? while ... ; do ... done ????????????????????????????
+            if (line.StartsWith("while "))
+            {
+                i = HandleWhile(lines, i, endIdx, vars, label);
+                continue;
+            }
+
+            // ?? case VAR in ... esac ???????????????????????????????
+            if (line.StartsWith("case "))
+            {
+                i = HandleCase(lines, i, endIdx, vars, label);
+                continue;
+            }
+
+            // ?? break / continue (handled by loop callers) ?????????
+            if (line == "break" || line == "continue")
+            {
+                // These are caught by loop handlers via _shellBreak/_shellContinue
+                if (line == "break") _shellBreak = true;
+                else _shellContinue = true;
+                i++;
+                return i;
+            }
+
+            // ?? Regular command ?????????????????????????????????????
+            line = ExpandCommandSubstitutions(line, vars, label);
 
             try
             {
-                Execute(line);
+                ExecuteLine(line);
+                vars["?"] = "0";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"nsh: {vfsPath}: {ex.Message}");
+                Console.WriteLine($"nsh: {label}: {ex.Message}");
+                vars["?"] = "1";
             }
 
-            // Stop if the script caused an exit
+            if (!_running) break;
+            i++;
+        }
+        return i;
+    }
+
+    // Flags for break/continue in loops
+    private bool _shellBreak;
+    private bool _shellContinue;
+
+    // ?? if/elif/else/fi ????????????????????????????????????????????
+
+    private int HandleIf(string[] lines, int startIdx, int endIdx,
+        Dictionary<string, string> vars, string label)
+    {
+        // Collect the if block structure
+        // if CONDITION; then     (or "if CONDITION" + next line "then")
+        // ... body ...
+        // elif CONDITION; then
+        // ... body ...
+        // else
+        // ... body ...
+        // fi
+
+        int i = startIdx;
+        bool anyBranchTaken = false;
+
+        // Parse "if CONDITION" or "if CONDITION; then"
+        string condition = ExtractCondition(lines[i].Trim(), "if ");
+        bool hasThen = condition.EndsWith("; then") || condition.EndsWith(";then");
+        if (hasThen)
+            condition = condition.Substring(0, condition.LastIndexOf(';')).Trim();
+        i++;
+
+        if (!hasThen)
+        {
+            // Next line should be "then"
+            while (i < endIdx && lines[i].Trim().Length == 0) i++;
+            if (i < endIdx && lines[i].Trim() == "then") i++;
+        }
+
+        // Collect body until elif/else/fi
+        int bodyStart = i;
+        int bodyEnd = FindBlockEnd(lines, i, endIdx, new[] { "elif", "else", "fi" });
+
+        if (!anyBranchTaken && EvaluateCondition(ExpandScriptVars(condition, vars), vars, label))
+        {
+            InterpretLines(lines, bodyStart, bodyEnd, vars, label);
+            anyBranchTaken = true;
+        }
+        i = bodyEnd;
+
+        // Handle elif / else chains
+        while (i < endIdx)
+        {
+            string cur = lines[i].Trim();
+            string expanded = ExpandScriptVars(cur, vars);
+
+            if (expanded == "fi")
+            {
+                i++;
+                break;
+            }
+
+            if (expanded.StartsWith("elif "))
+            {
+                condition = ExtractCondition(expanded, "elif ");
+                hasThen = condition.EndsWith("; then") || condition.EndsWith(";then");
+                if (hasThen)
+                    condition = condition.Substring(0, condition.LastIndexOf(';')).Trim();
+                i++;
+                if (!hasThen)
+                {
+                    while (i < endIdx && lines[i].Trim().Length == 0) i++;
+                    if (i < endIdx && lines[i].Trim() == "then") i++;
+                }
+
+                bodyStart = i;
+                bodyEnd = FindBlockEnd(lines, i, endIdx, new[] { "elif", "else", "fi" });
+
+                if (!anyBranchTaken && EvaluateCondition(condition, vars, label))
+                {
+                    InterpretLines(lines, bodyStart, bodyEnd, vars, label);
+                    anyBranchTaken = true;
+                }
+                i = bodyEnd;
+                continue;
+            }
+
+            if (expanded == "else")
+            {
+                i++;
+                bodyStart = i;
+                bodyEnd = FindBlockEnd(lines, i, endIdx, new[] { "fi" });
+
+                if (!anyBranchTaken)
+                {
+                    InterpretLines(lines, bodyStart, bodyEnd, vars, label);
+                    anyBranchTaken = true;
+                }
+                i = bodyEnd;
+                continue;
+            }
+
+            // Unexpected token, skip
+            i++;
+        }
+
+        return i;
+    }
+
+    // ?? for VAR in LIST; do ... done ???????????????????????????????
+
+    private int HandleFor(string[] lines, int startIdx, int endIdx,
+        Dictionary<string, string> vars, string label)
+    {
+        // for VAR in item1 item2 item3; do
+        // or:
+        // for VAR in item1 item2 item3
+        // do
+        string header = ExpandScriptVars(lines[startIdx].Trim(), vars);
+        header = ExpandCommandSubstitutions(header, vars, label);
+
+        // Parse: "for VAR in ..."
+        string rest = header.Substring(4).Trim(); // after "for "
+        int inIdx = rest.IndexOf(" in ");
+        if (inIdx < 0) return startIdx + 1; // malformed
+
+        string varName = rest.Substring(0, inIdx).Trim();
+        string listPart = rest.Substring(inIdx + 4).Trim();
+
+        bool hasDo = listPart.EndsWith("; do") || listPart.EndsWith(";do");
+        if (hasDo)
+            listPart = listPart.Substring(0, listPart.LastIndexOf(';')).Trim();
+
+        int i = startIdx + 1;
+        if (!hasDo)
+        {
+            while (i < endIdx && lines[i].Trim().Length == 0) i++;
+            if (i < endIdx && lines[i].Trim() == "do") i++;
+        }
+
+        // Find matching done
+        int bodyStart = i;
+        int bodyEnd = FindNestedBlockEnd(lines, i, endIdx, "do", "done");
+
+        // Parse list items (space-separated, supports glob-like *)
+        var items = ParseForList(listPart, vars, label);
+
+        foreach (var item in items)
+        {
+            vars[varName] = item;
+            _shellBreak = false;
+            _shellContinue = false;
+            InterpretLines(lines, bodyStart, bodyEnd, vars, label);
+            if (_shellBreak) { _shellBreak = false; break; }
+            if (_shellContinue) { _shellContinue = false; continue; }
             if (!_running) break;
         }
+
+        // Skip past "done"
+        return bodyEnd < endIdx ? bodyEnd + 1 : bodyEnd;
+    }
+
+    // ?? while CONDITION; do ... done ???????????????????????????????
+
+    private int HandleWhile(string[] lines, int startIdx, int endIdx,
+        Dictionary<string, string> vars, string label)
+    {
+        string header = lines[startIdx].Trim();
+        string condition = ExtractCondition(header, "while ");
+        bool hasDo = condition.EndsWith("; do") || condition.EndsWith(";do");
+        if (hasDo)
+            condition = condition.Substring(0, condition.LastIndexOf(';')).Trim();
+
+        int i = startIdx + 1;
+        if (!hasDo)
+        {
+            while (i < endIdx && lines[i].Trim().Length == 0) i++;
+            if (i < endIdx && lines[i].Trim() == "do") i++;
+        }
+
+        int bodyStart = i;
+        int bodyEnd = FindNestedBlockEnd(lines, i, endIdx, "do", "done");
+
+        int maxIter = 10000; // safety limit
+        int iter = 0;
+        while (iter++ < maxIter && _running)
+        {
+            string expandedCond = ExpandScriptVars(condition, vars);
+            if (!EvaluateCondition(expandedCond, vars, label))
+                break;
+
+            _shellBreak = false;
+            _shellContinue = false;
+            InterpretLines(lines, bodyStart, bodyEnd, vars, label);
+            if (_shellBreak) { _shellBreak = false; break; }
+            if (_shellContinue) { _shellContinue = false; continue; }
+        }
+
+        return bodyEnd < endIdx ? bodyEnd + 1 : bodyEnd;
+    }
+
+    // ?? case VAR in ... esac ???????????????????????????????????????
+
+    private int HandleCase(string[] lines, int startIdx, int endIdx,
+        Dictionary<string, string> vars, string label)
+    {
+        // case WORD in
+        //   pattern1) commands ;;
+        //   pattern2) commands ;;
+        //   *) commands ;;
+        // esac
+
+        string header = ExpandScriptVars(lines[startIdx].Trim(), vars);
+        // "case WORD in"
+        string rest = header.Substring(5).Trim(); // after "case "
+        if (rest.EndsWith(" in"))
+            rest = rest.Substring(0, rest.Length - 3).Trim();
+        string word = rest;
+
+        int i = startIdx + 1;
+        bool matched = false;
+
+        while (i < endIdx)
+        {
+            string cur = lines[i].Trim();
+            if (cur == "esac") { i++; break; }
+
+            // Look for pattern)
+            int parenIdx = cur.IndexOf(')');
+            if (parenIdx > 0)
+            {
+                string pattern = cur.Substring(0, parenIdx).Trim();
+                string cmdPart = cur.Substring(parenIdx + 1).Trim();
+                if (cmdPart.EndsWith(";;"))
+                    cmdPart = cmdPart.Substring(0, cmdPart.Length - 2).Trim();
+
+                bool isMatch = pattern == "*" || pattern == word ||
+                    (pattern.StartsWith("\"") && pattern.EndsWith("\"") &&
+                     pattern.Substring(1, pattern.Length - 2) == word);
+
+                if (!matched && isMatch)
+                {
+                    matched = true;
+                    if (cmdPart.Length > 0)
+                    {
+                        string expanded = ExpandScriptVars(cmdPart, vars);
+                        expanded = ExpandCommandSubstitutions(expanded, vars, label);
+                        try { ExecuteLine(expanded); vars["?"] = "0"; }
+                        catch { vars["?"] = "1"; }
+                    }
+
+                    // Execute subsequent lines until ;;
+                    i++;
+                    while (i < endIdx)
+                    {
+                        string cl = lines[i].Trim();
+                        if (cl == ";;" || cl == "esac") break;
+                        string expanded = ExpandScriptVars(cl, vars);
+                        expanded = ExpandCommandSubstitutions(expanded, vars, label);
+                        try { ExecuteLine(expanded); vars["?"] = "0"; }
+                        catch { vars["?"] = "1"; }
+                        i++;
+                    }
+                    if (i < endIdx && lines[i].Trim() == ";;") i++;
+                    continue;
+                }
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    // ?? Condition evaluation ???????????????????????????????????????
+
+    /// <summary>
+    /// Evaluate a shell condition. Supports:
+    ///   [ -f path ]        file exists
+    ///   [ -d path ]        directory exists
+    ///   [ -z "str" ]       string is empty
+    ///   [ -n "str" ]       string is non-empty
+    ///   [ str1 = str2 ]    string equality
+    ///   [ str1 != str2 ]   string inequality
+    ///   [ num1 -eq num2 ]  numeric equal
+    ///   [ num1 -ne num2 ]  numeric not equal
+    ///   [ num1 -lt num2 ]  numeric less than
+    ///   [ num1 -le num2 ]  numeric less or equal
+    ///   [ num1 -gt num2 ]  numeric greater than
+    ///   [ num1 -ge num2 ]  numeric greater or equal
+    ///   ! CONDITION         negate
+    ///   command             true if exit code 0
+    /// </summary>
+    private bool EvaluateCondition(string condition, Dictionary<string, string> vars, string label)
+    {
+        condition = condition.Trim();
+
+        // Handle negation
+        if (condition.StartsWith("! "))
+            return !EvaluateCondition(condition.Substring(2).Trim(), vars, label);
+
+        // Test brackets: [ ... ]
+        if (condition.StartsWith("[") && condition.EndsWith("]"))
+        {
+            string inner = condition.Substring(1, condition.Length - 2).Trim();
+            return EvaluateTest(inner, vars);
+        }
+
+        // [[ ... ]]
+        if (condition.StartsWith("[[") && condition.EndsWith("]]"))
+        {
+            string inner = condition.Substring(2, condition.Length - 4).Trim();
+            return EvaluateTest(inner, vars);
+        }
+
+        // test command
+        if (condition.StartsWith("test "))
+        {
+            string inner = condition.Substring(5).Trim();
+            return EvaluateTest(inner, vars);
+        }
+
+        // true/false literals
+        if (condition == "true") return true;
+        if (condition == "false") return false;
+
+        // Run command, check exit code
+        try
+        {
+            var origOut = Console.Out;
+            Console.SetOut(new StringWriter()); // suppress output
+            try
+            {
+                ExecuteLine(condition);
+                vars["?"] = "0";
+                return true;
+            }
+            catch
+            {
+                vars["?"] = "1";
+                return false;
+            }
+            finally
+            {
+                Console.SetOut(origOut);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool EvaluateTest(string expr, Dictionary<string, string> vars)
+    {
+        // Remove quotes from tokens
+        var parts = TokenizeTest(expr);
+
+        if (parts.Count == 0) return false;
+
+        // Unary tests
+        if (parts.Count == 2)
+        {
+            string op = parts[0];
+            string val = Unquote(parts[1]);
+            switch (op)
+            {
+                case "-f": return _fs.IsFile(VirtualFileSystem.ResolvePath(_cwd, val));
+                case "-d": return _fs.IsDirectory(VirtualFileSystem.ResolvePath(_cwd, val));
+                case "-e": return _fs.Exists(VirtualFileSystem.ResolvePath(_cwd, val));
+                case "-z": return string.IsNullOrEmpty(val);
+                case "-n": return !string.IsNullOrEmpty(val);
+                case "!": return !EvaluateTest(parts[1], vars);
+            }
+        }
+
+        // Binary tests
+        if (parts.Count == 3)
+        {
+            string left = Unquote(parts[0]);
+            string op = parts[1];
+            string right = Unquote(parts[2]);
+
+            switch (op)
+            {
+                case "=":
+                case "==": return left == right;
+                case "!=": return left != right;
+                case "-eq": return ParseInt(left) == ParseInt(right);
+                case "-ne": return ParseInt(left) != ParseInt(right);
+                case "-lt": return ParseInt(left) < ParseInt(right);
+                case "-le": return ParseInt(left) <= ParseInt(right);
+                case "-gt": return ParseInt(left) > ParseInt(right);
+                case "-ge": return ParseInt(left) >= ParseInt(right);
+            }
+        }
+
+        // Negated binary: ! -f path
+        if (parts.Count == 3 && parts[0] == "!")
+        {
+            return !EvaluateTest(string.Join(" ", parts.Skip(1)), vars);
+        }
+
+        // Single value: truthy if non-empty
+        if (parts.Count == 1)
+            return !string.IsNullOrEmpty(Unquote(parts[0]));
+
+        return false;
+    }
+
+    private static List<string> TokenizeTest(string expr)
+    {
+        var tokens = new List<string>();
+        var sb = new StringBuilder();
+        bool inQuote = false;
+        char qChar = '"';
+
+        foreach (char c in expr)
+        {
+            if (inQuote)
+            {
+                if (c == qChar) { inQuote = false; sb.Append(c); }
+                else sb.Append(c);
+            }
+            else if (c == '"' || c == '\'')
+            {
+                inQuote = true; qChar = c; sb.Append(c);
+            }
+            else if (c == ' ')
+            {
+                if (sb.Length > 0) { tokens.Add(sb.ToString()); sb.Clear(); }
+            }
+            else sb.Append(c);
+        }
+        if (sb.Length > 0) tokens.Add(sb.ToString());
+        return tokens;
+    }
+
+    private static string Unquote(string s)
+    {
+        if (s.Length >= 2 && ((s[0] == '"' && s[^1] == '"') || (s[0] == '\'' && s[^1] == '\'')))
+            return s[1..^1];
+        return s;
+    }
+
+    private static int ParseInt(string s)
+    {
+        return int.TryParse(s, out int v) ? v : 0;
+    }
+
+    /// <summary>
+    /// Evaluate simple arithmetic expressions: +, -, *, /, %
+    /// Supports integer math only.
+    /// </summary>
+    private static string EvaluateArithmetic(string expr)
+    {
+        try
+        {
+            // Tokenize: split on operators while keeping them
+            var tokens = new List<string>();
+            var num = new StringBuilder();
+            foreach (char c in expr)
+            {
+                if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%')
+                {
+                    if (num.Length > 0) { tokens.Add(num.ToString().Trim()); num.Clear(); }
+                    tokens.Add(c.ToString());
+                }
+                else
+                {
+                    num.Append(c);
+                }
+            }
+            if (num.Length > 0) tokens.Add(num.ToString().Trim());
+
+            if (tokens.Count == 0) return "0";
+
+            // Simple left-to-right evaluation (no operator precedence beyond * / %)
+            // First pass: handle *, /, %
+            var pass1 = new List<string>();
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (tokens[i] == "*" || tokens[i] == "/" || tokens[i] == "%")
+                {
+                    int left = ParseInt(pass1[pass1.Count - 1]);
+                    int right = ParseInt(tokens[++i]);
+                    int result = tokens[i - 1] switch
+                    {
+                        "*" => left * right,
+                        "/" => right != 0 ? left / right : 0,
+                        "%" => right != 0 ? left % right : 0,
+                        _ => 0
+                    };
+                    pass1[pass1.Count - 1] = result.ToString();
+                }
+                else
+                {
+                    pass1.Add(tokens[i]);
+                }
+            }
+
+            // Second pass: handle +, -
+            int total = ParseInt(pass1[0]);
+            for (int i = 1; i + 1 < pass1.Count; i += 2)
+            {
+                int right = ParseInt(pass1[i + 1]);
+                if (pass1[i] == "+") total += right;
+                else if (pass1[i] == "-") total -= right;
+            }
+
+            return total.ToString();
+        }
+        catch
+        {
+            return "0";
+        }
+    }
+
+    // ?? Variable expansion ?????????????????????????????????????????
+
+    private string ExpandScriptVars(string line, Dictionary<string, string> vars)
+    {
+        // First expand built-in shell vars
+        line = ExpandVariables(line);
+
+        // Then expand script-local $VAR and ${VAR}
+        var sb = new StringBuilder();
+        int i = 0;
+        while (i < line.Length)
+        {
+            if (line[i] == '$' && i + 1 < line.Length)
+            {
+                if (line[i + 1] == '{')
+                {
+                    int close = line.IndexOf('}', i + 2);
+                    if (close > 0)
+                    {
+                        string name = line.Substring(i + 2, close - i - 2);
+                        sb.Append(vars.GetValueOrDefault(name, ""));
+                        i = close + 1;
+                        continue;
+                    }
+                }
+                else if (line[i + 1] == '(')
+                {
+                    // Arithmetic expansion: $((expr))
+                    if (i + 2 < line.Length && line[i + 2] == '(')
+                    {
+                        int closeIdx = line.IndexOf("))", i + 3);
+                        if (closeIdx > 0)
+                        {
+                            string expr = line.Substring(i + 3, closeIdx - i - 3).Trim();
+                            sb.Append(EvaluateArithmetic(expr));
+                            i = closeIdx + 2;
+                            continue;
+                        }
+                    }
+                    // Command substitution handled later
+                    sb.Append(line[i]);
+                    i++;
+                    continue;
+                }
+                else
+                {
+                    // $VAR or $1 etc
+                    int start = i + 1;
+                    int end = start;
+                    while (end < line.Length && (char.IsLetterOrDigit(line[end]) || line[end] == '_' || line[end] == '?' || line[end] == '#' || line[end] == '@'))
+                        end++;
+                    if (end > start)
+                    {
+                        string name = line.Substring(start, end - start);
+                        sb.Append(vars.GetValueOrDefault(name, ""));
+                        i = end;
+                        continue;
+                    }
+                }
+            }
+            sb.Append(line[i]);
+            i++;
+        }
+        return sb.ToString();
+    }
+
+    // ?? Command substitution: $(cmd) ???????????????????????????????
+
+    private string ExpandCommandSubstitutions(string line, Dictionary<string, string> vars, string label)
+    {
+        var sb = new StringBuilder();
+        int i = 0;
+        while (i < line.Length)
+        {
+            if (i + 1 < line.Length && line[i] == '$' && line[i + 1] == '(')
+            {
+                // Find matching close paren
+                int depth = 1;
+                int start = i + 2;
+                int end = start;
+                while (end < line.Length && depth > 0)
+                {
+                    if (line[end] == '(') depth++;
+                    else if (line[end] == ')') depth--;
+                    if (depth > 0) end++;
+                }
+
+                string cmd = line.Substring(start, end - start);
+                cmd = ExpandScriptVars(cmd, vars);
+
+                // Capture command output
+                var origOut = Console.Out;
+                var capture = new StringWriter();
+                Console.SetOut(capture);
+                try
+                {
+                    ExecuteLine(cmd);
+                    vars["?"] = "0";
+                }
+                catch
+                {
+                    vars["?"] = "1";
+                }
+                finally
+                {
+                    Console.SetOut(origOut);
+                }
+
+                string result = capture.ToString().TrimEnd('\n', '\r');
+                sb.Append(result);
+                i = end + 1;
+                continue;
+            }
+
+            // Backtick form: `cmd`
+            if (line[i] == '`')
+            {
+                int closeIdx = line.IndexOf('`', i + 1);
+                if (closeIdx > i)
+                {
+                    string cmd = line.Substring(i + 1, closeIdx - i - 1);
+                    cmd = ExpandScriptVars(cmd, vars);
+
+                    var origOut = Console.Out;
+                    var capture = new StringWriter();
+                    Console.SetOut(capture);
+                    try { ExecuteLine(cmd); vars["?"] = "0"; }
+                    catch { vars["?"] = "1"; }
+                    finally { Console.SetOut(origOut); }
+
+                    sb.Append(capture.ToString().TrimEnd('\n', '\r'));
+                    i = closeIdx + 1;
+                    continue;
+                }
+            }
+
+            sb.Append(line[i]);
+            i++;
+        }
+        return sb.ToString();
+    }
+
+    // ?? Helper: check if line is VAR=value ?????????????????????????
+
+    private static bool IsAssignment(string line, out string key, out string value)
+    {
+        key = value = "";
+        // Must not start with a command keyword
+        if (line.StartsWith("if ") || line.StartsWith("for ") || line.StartsWith("while ") ||
+            line.StartsWith("case ") || line.StartsWith("echo ") || line.StartsWith("export "))
+            return false;
+
+        int eq = line.IndexOf('=');
+        if (eq <= 0) return false;
+
+        string left = line.Substring(0, eq);
+        // Variable name must be alphanumeric/underscore, no spaces
+        foreach (char c in left)
+            if (!char.IsLetterOrDigit(c) && c != '_') return false;
+
+        key = left;
+        value = Unquote(line.Substring(eq + 1).Trim());
+        return true;
+    }
+
+    // ?? Helper: extract condition from "if CONDITION" ??????????????
+
+    private static string ExtractCondition(string line, string keyword)
+    {
+        return line.Substring(keyword.Length).Trim();
+    }
+
+    // ?? Helper: find block terminator at the same nesting level ????
+
+    private static int FindBlockEnd(string[] lines, int start, int end, string[] terminators)
+    {
+        int depth = 0;
+        for (int i = start; i < end; i++)
+        {
+            string cur = lines[i].Trim();
+            // Track nesting
+            if (cur.StartsWith("if ")) depth++;
+            if (cur == "fi") { if (depth > 0) { depth--; continue; } }
+
+            if (depth == 0)
+            {
+                foreach (var t in terminators)
+                {
+                    if (cur == t || cur.StartsWith(t + " "))
+                        return i;
+                }
+            }
+        }
+        return end;
+    }
+
+    /// <summary>
+    /// Find the matching close keyword for a nested block (for/while do..done).
+    /// </summary>
+    private static int FindNestedBlockEnd(string[] lines, int start, int end,
+        string openKeyword, string closeKeyword)
+    {
+        int depth = 0;
+        for (int i = start; i < end; i++)
+        {
+            string cur = lines[i].Trim();
+            // Count nested for/while blocks
+            if (cur.StartsWith("for ") || cur.StartsWith("while "))
+                depth++;
+            if (cur == closeKeyword || cur.StartsWith(closeKeyword + " ") ||
+                cur.StartsWith(closeKeyword + ";"))
+            {
+                if (depth > 0) { depth--; continue; }
+                return i;
+            }
+        }
+        return end;
+    }
+
+    // ?? Helper: parse for-loop list items ??????????????????????????
+
+    private List<string> ParseForList(string listPart, Dictionary<string, string> vars, string label)
+    {
+        listPart = ExpandCommandSubstitutions(listPart, vars, label);
+        var items = new List<string>();
+        var sb = new StringBuilder();
+        bool inQuote = false;
+        char qChar = '"';
+
+        foreach (char c in listPart)
+        {
+            if (inQuote)
+            {
+                if (c == qChar) inQuote = false;
+                else sb.Append(c);
+            }
+            else if (c == '"' || c == '\'')
+            {
+                inQuote = true; qChar = c;
+            }
+            else if (c == ' ')
+            {
+                if (sb.Length > 0) { items.Add(sb.ToString()); sb.Clear(); }
+            }
+            else sb.Append(c);
+        }
+        if (sb.Length > 0) items.Add(sb.ToString());
+        return items;
     }
 
     private string ExpandVariables(string line)

@@ -283,5 +283,6 @@ public static class Settings
         foreach (var kv in dict)
             content += kv.Key + "=" + kv.Value + "\n";
         api.WriteText(path, content);
+        api.Save();
     }
 }

@@ -1,37 +1,48 @@
         IMPORTFILE(8)             NetNIX Manual             IMPORTFILE(8)
 
         NAME
-            importfile - import a file from the host filesystem into the VFS
+            importfile - import files or directories from the host into the VFS
 
         SYNOPSIS
             importfile <host-path> [vfs-path]
+            importfile -d <host-dir> [vfs-dir]
 
         DESCRIPTION
-            Reads a file from the host operating system and copies it
-            into the NetNIX virtual filesystem.
+            Reads a file (or directory) from the host operating system and
+            copies it into the NetNIX virtual filesystem.
 
-            If vfs-path is omitted, the file is placed in the current
-            working directory using the original filename.
+            If vfs-path is omitted, the file or directory is placed in the
+            current working directory using the original name.
 
-            If vfs-path is a directory, the file is placed inside that
-            directory using the original filename.
+            If vfs-path is an existing directory, the file is placed inside
+            that directory using the original filename.
 
-            Only root (uid 0) can import files from the host.
+            With -d, the entire host directory and all its contents are
+            imported recursively, preserving the directory structure.
+
+            Only root (uid 0) can import from the host.
 
         ARGUMENTS
-            <host-path>     Full path to a file on the host OS
+            <host-path>     Full path to a file or directory on the host OS
             [vfs-path]      Destination path in the VFS (default: cwd)
+
+        OPTIONS
+            -d, --directory Import a directory and all contents recursively
+            -h, --help      Show usage help
 
         EXAMPLES
             importfile C:\\Users\\me\\data.zip
             importfile C:\\Users\\me\\data.zip /tmp/data.zip
             importfile C:\\Users\\me\\notes.txt /home/alice/
             importfile ~/script.cs /bin/script.cs
+            importfile -d C:\\Users\\me\\project /home/alice/project
+            importfile -d C:\\Users\\me\\scripts
 
         NOTES
-            Only root can import files from the host.
-            The file is copied � the host original is not modified.
-            If the VFS destination already exists it is overwritten.
+            Only root can import from the host.
+            Files are copied — the host originals are not modified.
+            If a VFS destination already exists it is overwritten.
+            With -d, the full directory tree is imported recursively.
 
         SEE ALSO
             export, mount, cp
