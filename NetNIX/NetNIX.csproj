@@ -50,6 +50,9 @@
     <None Update="License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="motd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="NetNIX.readme">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
